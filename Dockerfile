@@ -28,6 +28,7 @@ COPY --from=builder /app/.next/server ./.next/server
 ENV PROXY_URL=""
 ENV OPENAI_API_KEY=""
 ENV GOOGLE_API_KEY=""
+ENV ANTHROPIC_API_KEY=""
 ENV CODE=""
 
 EXPOSE 3000
