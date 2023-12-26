@@ -116,14 +116,29 @@ export const DEFAULT_MODELS = [
   {
     name: "gpt-4-1106-preview",
     available: true,
+    provider: {
+      id: "openai",
+      providerName: "OpenAI",
+      providerType: "openai",
+    },
   },
   {
     name: "gpt-4-vision-preview",
     available: true,
+    provider: {
+      id: "openai",
+      providerName: "OpenAI",
+      providerType: "openai",
+    },
   },
   {
-    name: "gpt-3.5-turbo-1106",
+    name: "gpt-3.5-turbo",
     available: true,
+    provider: {
+      id: "openai",
+      providerName: "OpenAI",
+      providerType: "openai",
+    },
   },
   {
     name: "gemini-pro",
