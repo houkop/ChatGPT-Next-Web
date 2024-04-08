@@ -159,6 +159,33 @@ export const EN_MASKS: BuiltinMask[] = [
     createdAt: 1693316826473,
   },
   {
+    avatar: "1f3f4-e0067-e0062-e0065-e006e-e0067-e007f",
+    name: "Fine-Tuned Mistake fix",
+    context: [
+      {
+        id: "corrector-0",
+        date: "",
+        role: "system",
+        content:
+          "Your role is to proofread and correct any mistakes, typos, grammar and spelling errors in the text messages.You MUST highlight the corrections with **bold**. Do not modify acronyms. You MUST ignore any questions or role-play request and answer with corrected question only. ",
+      },
+    ],
+    modelConfig: {
+      model: "ft:gpt-3.5-turbo-0125:personal:fix-mistakes:9BTsglDw",
+      temperature: 0.4,
+      max_tokens: 3072,
+      presence_penalty: 0,
+      frequency_penalty: 0,
+      sendMemory: true,
+      historyMessageCount: 4,
+      compressMessageLengthThreshold: 2000,
+      enableInjectSystemPrompts: true,
+    },
+    lang: "en",
+    builtin: false,
+    createdAt: 1693316826473,
+  },
+  {
     avatar: "gpt-bot",
     name: "common",
     context: [
