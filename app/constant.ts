@@ -156,6 +156,15 @@ export const DEFAULT_MODELS = [
     },
   },
   {
+    name: "gpt-4-turbo-2024-04-09",
+    available: true,
+    provider: {
+      id: "openai",
+      providerName: "OpenAI",
+      providerType: "openai",
+    },
+  },
+  {
     name: "gpt-4-vision-preview",
     available: true,
     provider: {
