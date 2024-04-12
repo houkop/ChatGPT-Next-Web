@@ -91,10 +91,6 @@ const ru: PartialLocaleType = {
       Title: "Отправить предпросмотр",
       SubTitle: "Предварительный просмотр markdown в пузыре",
     },
-    AutoScrollMessage: {
-      Title: "Автопрокрутка ответа",
-      SubTitle: "Прокрутка сообщения во время ответа",
-    },
     Mask: {
       Splash: {
         Title: "Экран заставки маски",
