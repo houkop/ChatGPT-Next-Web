@@ -34,7 +34,6 @@ export const DEFAULT_CONFIG = {
   theme: Theme.Auto as Theme,
   tightBorder: !!getClientConfig()?.isApp,
   sendPreviewBubble: true,
-  autoScrollMessage: true,
   enableAutoGenerateTitle: true,
   sidebarWidth: DEFAULT_SIDEBAR_WIDTH,
 
@@ -47,7 +46,7 @@ export const DEFAULT_CONFIG = {
   models: DEFAULT_MODELS as any as LLMModel[],
 
   modelConfig: {
-    model: "gpt-4-turbo" as ModelType,
+    model: "gpt-4-turbo-preview" as ModelType,
     temperature: 0.4,
     top_p: 1,
     max_tokens: 4000,
