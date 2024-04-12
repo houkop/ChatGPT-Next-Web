@@ -392,11 +392,13 @@ function useScrollToBottom(
   // for auto-scroll
 
   const [autoScroll, setAutoScroll] = useState(true);
+  const config = useAppConfig();
+  let isAutoScrollEnabled: boolean = config.autoScrollMessage;
   function scrollDomToBottom() {
     const dom = scrollRef.current;
     if (dom) {
       requestAnimationFrame(() => {
-        setAutoScroll(true);
+        setAutoScroll(isAutoScrollEnabled);
         dom.scrollTo(0, dom.scrollHeight);
       });
     }
@@ -1016,7 +1018,8 @@ function _Chat() {
     }
 
     setHitBottom(isHitBottom);
-    setAutoScroll(isHitBottom);
+    let isAutoScrollEnabled: boolean = config.autoScrollMessage;
+    setAutoScroll(isAutoScrollEnabled);
   };
   function scrollToBottom() {
     setMsgRenderIndex(renderMessages.length - CHAT_PAGE_SIZE);
@@ -1102,11 +1105,13 @@ function _Chat() {
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-  
+
   const handlePaste = useCallback(
     async (event: React.ClipboardEvent<HTMLTextAreaElement>) => {
       const currentModel = chatStore.currentSession().mask.modelConfig.model;
-      if(!isVisionModel(currentModel)){return;}
+      if (!isVisionModel(currentModel)) {
+        return;
+      }
       const items = (event.clipboardData || window.clipboardData).items;
       for (const item of items) {
         if (item.kind === "file" && item.type.startsWith("image/")) {
