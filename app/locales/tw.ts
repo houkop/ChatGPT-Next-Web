@@ -224,6 +224,10 @@ const tw = {
       },
       ImportFailed: "導入失敗",
     },
+    AutoScrollMessage: {
+      Title: "Auto-Scroll Reply",
+      SubTitle: "Scroll the message during reply",
+    },
     Mask: {
       Splash: {
         Title: "面具啟動頁面",

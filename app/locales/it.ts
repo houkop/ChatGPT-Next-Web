@@ -91,6 +91,10 @@ const it: PartialLocaleType = {
       Title: "Anteprima di digitazione",
       SubTitle: "Preview markdown in bubble",
     },
+    AutoScrollMessage: {
+      Title: "Auto-Scroll Reply",
+      SubTitle: "Scroll the message during reply",
+    },
     Mask: {
       Splash: {
         Title: "Mask Splash Screen",

@@ -91,6 +91,10 @@ const vi: PartialLocaleType = {
       Title: "Gửi bong bóng xem trước",
       SubTitle: "Xem trước nội dung markdown bằng bong bóng",
     },
+    AutoScrollMessage: {
+      Title: "Auto-Scroll Reply",
+      SubTitle: "Scroll the message during reply",
+    },
     Mask: {
       Splash: {
         Title: "Mask Splash Screen",

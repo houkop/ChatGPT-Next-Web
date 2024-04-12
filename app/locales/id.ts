@@ -200,6 +200,10 @@ const id: PartialLocaleType = {
       Title: "Pratinjau Obrolan",
       SubTitle: "Pratinjau Obrolan dengan markdown",
     },
+    AutoScrollMessage: {
+      Title: "Auto-Scroll Reply",
+      SubTitle: "Scroll the message during reply",
+    },
     Mask: {
       Splash: {
         Title: "Layar Pembuka Masks",
@@ -369,8 +373,8 @@ const id: PartialLocaleType = {
   },
   Exporter: {
     Description: {
-      Title: "Hanya pesan setelah menghapus konteks yang akan ditampilkan"
-    },  
+      Title: "Hanya pesan setelah menghapus konteks yang akan ditampilkan",
+    },
     Model: "Model",
     Messages: "Pesan",
     Topic: "Topik",

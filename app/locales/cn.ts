@@ -223,6 +223,10 @@ const cn = {
       },
       ImportFailed: "导入失败",
     },
+    AutoScrollMessage: {
+      Title: "自动滚动回复",
+      SubTitle: "滚动消息以进行回复",
+    },
     Mask: {
       Splash: {
         Title: "面具启动页",

@@ -224,6 +224,10 @@ const pt: PartialLocaleType = {
       },
       ImportFailed: "Falha ao importar do arquivo",
     },
+    AutoScrollMessage: {
+      Title: "Auto-Scroll Reply",
+      SubTitle: "Scroll the message during reply",
+    },
     Mask: {
       Splash: {
         Title: "Tela de Início da Máscara",

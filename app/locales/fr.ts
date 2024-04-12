@@ -135,6 +135,10 @@ const fr: PartialLocaleType = {
       Title: "Aperçu de l'envoi dans une bulle",
       SubTitle: "Aperçu du Markdown dans une bulle",
     },
+    AutoScrollMessage: {
+      Title: "Auto-Scroll Reply",
+      SubTitle: "Scroll the message during reply",
+    },
     Mask: {
       Splash: {
         Title: "Écran de masque",

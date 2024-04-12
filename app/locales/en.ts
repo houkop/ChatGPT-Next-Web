@@ -226,6 +226,10 @@ const en: LocaleType = {
       },
       ImportFailed: "Failed to import from file",
     },
+    AutoScrollMessage: {
+      Title: "Auto-Scroll Reply",
+      SubTitle: "Scroll the message during reply",
+    },
     Mask: {
       Splash: {
         Title: "Mask Splash Screen",

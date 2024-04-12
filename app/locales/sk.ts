@@ -226,6 +226,10 @@ const sk: PartialLocaleType = {
       },
       ImportFailed: "Import z súboru zlyhal",
     },
+    AutoScrollMessage: {
+      Title: "Auto-Scroll Reply",
+      SubTitle: "Scroll the message during reply",
+    },
     Mask: {
       Splash: {
         Title: "Úvodná obrazovka masky",
