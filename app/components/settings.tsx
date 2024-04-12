@@ -829,7 +829,21 @@ export function Settings() {
             ></input>
           </ListItem>
         </List>
-
+        <ListItem
+          title={Locale.Settings.AutoScrollMessage.Title}
+          subTitle={Locale.Settings.AutoScrollMessage.SubTitle}
+        >
+          <input
+            type="checkbox"
+            checked={config.autoScrollMessage}
+            onChange={(e) =>
+              updateConfig(
+                (config) =>
+                  (config.autoScrollMessage = e.currentTarget.checked),
+              )
+            }
+          ></input>
+        </ListItem>
         <SyncItems />
 
         <List>
