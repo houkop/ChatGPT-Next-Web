@@ -62,7 +62,12 @@ const ar: PartialLocaleType = {
     Copy: "نسخ الكل",
     Download: "تنزيل",
     MessageFromYou: "رسالة منك",
-    MessageFromChatGPT: "رسالة من ChatGPT",
+    MessageFromChatGPT: {
+      NoRole: "رسالة من ChatGPT",
+      RoleAssistant: "مساعد",
+      RoleSystem: "النظام",
+      SysMemoryPrompt: "تذكير الذاكرة النظامية",
+    },
     Share: "مشاركة على ShareGPT",
     Format: {
       Title: "صيغة التصدير",
@@ -175,11 +180,14 @@ ${builtin} مدمجة، ${custom} تم تعريفها من قبل المستخد
     Usage: {
       Title: "رصيد الحساب",
       SubTitle(used: any, total: any) {
-        return `تم استخدام $${used} من هذا الشهر، الاشتراك ${total}`;
+        const hardLimitusd = total.hard_limit_usd !== undefined ? new Intl.NumberFormat('ar-EG', { style: 'currency', currency: 'USD' }).format(total.hard_limit_usd) : "غير معروف";
+        const hardLimit = total.system_hard_limit_usd !== undefined ? new Intl.NumberFormat('ar-EG', { style: 'currency', currency: 'USD' }).format(total.system_hard_limit_usd) : "غير معروف";
+        const usedFormatted = new Intl.NumberFormat('ar-EG', { style: 'currency', currency: 'USD' }).format(used);
+        return `المستخدمة هذا الشهر: ${usedFormatted}، الحد الأقصى الصعب: ${hardLimitusd}، الحد المسموح به للاستخدام: ${hardLimit}`;
       },
       IsChecking: "جارٍ التحقق...",
       Check: "التحقق",
-      NoAccess: "أدخل مفتاح API للتحقق من الرصيد",
+      NoAccess: `أدخل مفتاح الجلسة في مفتاح واجهة برمجة التطبيقات بدءًا من البادئة "sess-" للتحقق من الرصيد.`,
     },
 
     Model: "النموذج",
@@ -228,6 +236,10 @@ ${builtin} مدمجة، ${custom} تم تعريفها من قبل المستخد
   },
   FineTuned: {
     Sysmessage: "أنت مساعد ي",
+  },
+  PrivacyPage: {
+    Name: "الخصوصية",
+    Confirm: "موافق",
   },
   Mask: {
     Name: "الأقنعة",
@@ -280,6 +292,7 @@ ${builtin} مدمجة، ${custom} تم تعريفها من قبل المستخد
     Cancel: "إلغاء",
     Close: "إغلاق",
     Create: "إنشاء",
+    Continue: "استمرار",
     Edit: "تعديل",
   },
   Exporter: {

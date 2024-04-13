@@ -332,6 +332,12 @@ bash <(curl -s https://raw.githubusercontent.com/Yidadaa/ChatGPT-Next-Web/main/s
 - [How to use Vercel (No English)](./docs/vercel-cn.md)
 - [User Manual (Only Chinese, WIP)](./docs/user-manual-cn.md)
 
+## External Tools
+
+> List tools are compatible with this repo (e.g, can be used for text embedding,training models AI,fine-tuning openai)
+
+- [ChatGPT-Next-Web-Session-Exporter](https://github.com/H0llyW00dzZ/ChatGPT-Next-Web-Session-Exporter)
+
 ## Screenshots
 
 ![Settings](./docs/images/settings.png)

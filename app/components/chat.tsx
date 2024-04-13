@@ -29,6 +29,8 @@ import PinIcon from "../icons/pin.svg";
 import EditIcon from "../icons/rename.svg";
 import ConfirmIcon from "../icons/confirm.svg";
 import CancelIcon from "../icons/cancel.svg";
+import DownloadIcon from "../icons/download.svg";
+import UploadIcon from "../icons/upload.svg";
 import ImageIcon from "../icons/image.svg";
 
 import LightIcon from "../icons/light.svg";
@@ -37,6 +39,11 @@ import AutoIcon from "../icons/auto.svg";
 import BottomIcon from "../icons/bottom.svg";
 import StopIcon from "../icons/pause.svg";
 import RobotIcon from "../icons/robot.svg";
+import ChatGptIcon from "../icons/chatgpt.png";
+import EyeOnIcon from "../icons/eye.svg";
+import EyeOffIcon from "../icons/eye-off.svg";
+import { escapeRegExp } from "lodash";
+import CloseIcon from "../icons/close.svg";
 
 import {
   ChatMessage,
@@ -56,6 +63,8 @@ import {
   selectOrCopy,
   autoGrowTextArea,
   useMobileScreen,
+  downloadAs,
+  readFromFile,
   getMessageTextContent,
   getMessageImages,
   isVisionModel,
@@ -96,7 +105,12 @@ import { prettyObject } from "../utils/format";
 import { ExportMessageModal } from "./exporter";
 import { getClientConfig } from "../config/client";
 import { useAllModels } from "../utils/hooks";
+import { clearUnfinishedInputForSession, debouncedSave } from "../utils/storageHelper";
+import { usePinApp } from "./usePinApp";
+import { useDebouncedEffect } from "./useDebouncedEffect";
 import { MultimodalContent } from "../client/api";
+import Image from 'next/image';
+
 
 const Markdown = dynamic(async () => (await import("./markdown")).Markdown, {
   loading: () => <LoadingIcon />,
@@ -108,12 +122,68 @@ export function SessionConfigModel(props: { onClose: () => void }) {
   const maskStore = useMaskStore();
   const navigate = useNavigate();
 
+  const [exporting, setExporting] = useState(false);
+  const isApp = !!getClientConfig()?.isApp;
+  const isMobileScreen = useMobileScreen();
+
+  const handleExport = async () => {
+    if (exporting) return;
+    setExporting(true);
+    const currentDate = new Date();
+    const currentSession = chatStore.currentSession();
+    const messageCount = currentSession.messages.length;
+    const datePart = isApp
+      ? `${currentDate.toLocaleDateString().replace(/\//g, '_')} ${currentDate.toLocaleTimeString().replace(/:/g, '_')}`
+      : `${currentDate.toLocaleString().replace(/:/g, '_')}`;
+  
+    const formattedMessageCount = Locale.ChatItem.ChatItemCount(messageCount); // Format the message count using the translation function
+    const fileName = `${session.topic}-(${formattedMessageCount})-${datePart}.json`;
+    await downloadAs(session, fileName);
+    setExporting(false);
+  };
+
+  const importchat = async () => {
+    await readFromFile().then((content) => {
+      try {
+        const importedData = JSON.parse(content);
+        chatStore.updateCurrentSession((session) => {
+          Object.assign(session, importedData);
+        });
+      } catch (e) {
+        console.error("[Import] Failed to import JSON file:", e);
+        showToast(Locale.Settings.Sync.ImportFailed);
+      }
+    });
+  };
+
   return (
     <div className="modal-mask">
       <Modal
         title={Locale.Context.Edit}
         onClose={() => props.onClose()}
         actions={[
+          /**
+           * Currently disabled in mobile for export/import
+           **/
+          !isMobileScreen && (
+            <IconButton
+              key="export"
+              icon={<DownloadIcon />}
+              bordered
+              text={Locale.UI.Export}
+              onClick={handleExport}
+              disabled={exporting}
+            />
+          ),
+          !isMobileScreen && (
+            <IconButton
+              key="import"
+              icon={<UploadIcon />}
+              bordered
+              text={Locale.UI.Import}
+              onClick={importchat}
+            />
+          ),
           <IconButton
             key="reset"
             icon={<ResetIcon />}
@@ -390,25 +460,52 @@ function useScrollToBottom(
   detach: boolean = false,
 ) {
   // for auto-scroll
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const [autoScroll, setAutoScroll] = useState(true);
+  const userHasScrolledUp = useRef(false);
+
+  function onScroll() {
+    if (!scrollRef.current) return;
+
+    const { scrollTop, scrollHeight, clientHeight } = scrollRef.current;
+    const isAtBottom = scrollTop + clientHeight >= scrollHeight;
+
+    userHasScrolledUp.current = !isAtBottom;
+  }
 
   const [autoScroll, setAutoScroll] = useState(true);
   const config = useAppConfig();
   let isAutoScrollEnabled: boolean = config.autoScrollMessage;
   function scrollDomToBottom() {
     const dom = scrollRef.current;
-    if (dom) {
-      requestAnimationFrame(() => {
-        setAutoScroll(isAutoScrollEnabled);
-        dom.scrollTo(0, dom.scrollHeight);
-      });
+    if (dom && !userHasScrolledUp.current) {
+      dom.scrollTop = dom.scrollHeight;
     }
   }
+
+  const scrollToBottomSmooth = () => {
+    const scrollContainer = scrollRef.current;
+    if (scrollContainer) {
+      const scrollHeight = scrollContainer.scrollHeight;
+      const height = scrollContainer.clientHeight;
+      const maxScrollTop = scrollHeight - height;
+      scrollContainer.scrollTo({ top: maxScrollTop, behavior: 'smooth' });
+    }
+  };
 
   // auto scroll
   useEffect(() => {
     if (autoScroll && !detach) {
       scrollDomToBottom();
     }
+    const dom = scrollRef.current;
+    dom?.addEventListener("scroll", onScroll);
+
+    scrollDomToBottom();
+
+    return () => {
+      dom?.removeEventListener("scroll", onScroll);
+    };
   });
 
   return {
@@ -416,6 +513,7 @@ function useScrollToBottom(
     autoScroll,
     setAutoScroll,
     scrollDomToBottom,
+    scrollToBottomSmooth,
   };
 }
 
@@ -427,7 +525,10 @@ export function ChatActions(props: {
   scrollToBottom: () => void;
   showPromptHints: () => void;
   hitBottom: boolean;
+  showContextPrompts: boolean;
+  toggleContextPrompts: () => void;
   uploading: boolean;
+  attachImages: string[];
 }) {
   const config = useAppConfig();
   const navigate = useNavigate();
@@ -457,25 +558,38 @@ export function ChatActions(props: {
   const [showModelSelector, setShowModelSelector] = useState(false);
   const [showUploadImage, setShowUploadImage] = useState(false);
 
+  // this fix memory leak as well, idk why front-end it's so fucking difficult to maintain cause of stupid complex
+  // for front-end developer you literally fucking retarded, write a complex code
   useEffect(() => {
     const show = isVisionModel(currentModel);
-    setShowUploadImage(show);
+    if (showUploadImage !== show) {
+      setShowUploadImage(show);
+    }
+
     if (!show) {
-      props.setAttachImages([]);
-      props.setUploading(false);
+      // Check if there's really a need to update these states to prevent unnecessary re-renders
+      if (props.uploading) {
+        props.setUploading(false);
+      }
+      if (props.attachImages.length !== 0) {
+        props.setAttachImages([]);
+      }
     }
 
     // if current model is not available
     // switch to first available model
-    const isUnavaliableModel = !models.some((m) => m.name === currentModel);
-    if (isUnavaliableModel && models.length > 0) {
+    const isUnavailableModel = !models.some((m) => m.name === currentModel);
+    if (isUnavailableModel && models.length > 0) {
       const nextModel = models[0].name as ModelType;
-      chatStore.updateCurrentSession(
-        (session) => (session.mask.modelConfig.model = nextModel),
-      );
-      showToast(nextModel);
+      // Only update if the next model is different from the current model
+      if (currentModel !== nextModel) {
+        chatStore.updateCurrentSession(
+          (session) => (session.mask.modelConfig.model = nextModel),
+        );
+        showToast(nextModel);
+      }
     }
-  }, [chatStore, currentModel, models]);
+  }, [props, chatStore, currentModel, models, showUploadImage]);
 
   return (
     <div className={styles["chat-input-actions"]}>
@@ -528,6 +642,22 @@ export function ChatActions(props: {
         onClick={props.showPromptHints}
         text={Locale.Chat.InputActions.Prompt}
         icon={<PromptIcon />}
+      />
+
+      <ChatAction
+        onClick={props.toggleContextPrompts}
+        text={
+          props.showContextPrompts
+            ? Locale.Mask.Config.ShowFullChatHistory.UnHide
+            : Locale.Mask.Config.ShowFullChatHistory.Hide
+        }
+        icon={
+          props.showContextPrompts ? (
+            <EyeOffIcon />
+          ) : (
+            <EyeOnIcon />
+          )
+        }
       />
 
       <ChatAction
@@ -645,8 +775,34 @@ export function EditMessageModal(props: { onClose: () => void }) {
 
 export function DeleteImageButton(props: { deleteImage: () => void }) {
   return (
-    <div className={styles["delete-image"]} onClick={props.deleteImage}>
+    <div
+      className={styles["delete-image"]}
+      onClick={(e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        props.deleteImage();
+      }}
+    >
       <DeleteIcon />
+    </div>
+  );
+}
+
+export function ImageBox(props: {
+  showImageBox: boolean;
+  data: { src: string; alt: string };
+  closeImageBox: () => void;
+}) {
+  return (
+    <div
+      className={styles["image-box"]}
+      style={{ display: props.showImageBox ? "block" : "none" }}
+      onClick={props.closeImageBox}
+    >
+      <img src={props.data.src} alt={props.data.alt} />
+      <div className={styles["image-box-close-button"]}>
+        <CloseIcon />
+      </div>
     </div>
   );
 }
@@ -679,8 +835,12 @@ function _Chat() {
   const [hitBottom, setHitBottom] = useState(true);
   const isMobileScreen = useMobileScreen();
   const navigate = useNavigate();
+  const { pinApp, togglePinApp } = usePinApp(session.id);
+  const isApp = getClientConfig()?.isApp;
   const [attachImages, setAttachImages] = useState<string[]>([]);
   const [uploading, setUploading] = useState(false);
+  const [showImageBox, setShowImageBox] = useState(false);
+  const [imageBoxData, setImageBoxData] = useState({ src: "", alt: "" });
 
   // prompt hints
   const promptStore = usePromptStore();
@@ -715,18 +875,76 @@ function _Chat() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(measure, [userInput]);
 
+  const loadchat = () => {
+    readFromFile().then((content) => {
+      try {
+        const importedData = JSON.parse(content);
+        chatStore.updateCurrentSession((session) => {
+          Object.assign(session, importedData);
+          // Set any other properties you want to update in the session
+        });
+      } catch (e) {
+        console.error("[Import] Failed to import JSON file:", e);
+        showToast(Locale.Settings.Sync.ImportFailed);
+      }
+    });
+  };
+  
   // chat commands shortcuts
   const chatCommands = useChatCommand({
     new: () => chatStore.newSession(),
     newm: () => navigate(Path.NewChat),
     prev: () => chatStore.nextSession(-1),
     next: () => chatStore.nextSession(1),
+    restart: () => window.__TAURI__?.process.relaunch(),
     clear: () =>
       chatStore.updateCurrentSession(
         (session) => (session.clearContextIndex = session.messages.length),
       ),
     del: () => chatStore.deleteSession(chatStore.currentSessionIndex),
-  });
+    save: () =>
+      downloadAs((session), `${session.topic}.json`),
+    load: loadchat,
+    copymemoryai: () => {
+      const memoryPrompt = chatStore.currentSession().memoryPrompt;
+      if (memoryPrompt.trim() !== "") {
+        copyToClipboard(memoryPrompt);
+        showToast(Locale.Copy.Success);
+      } else {
+        showToast(Locale.Copy.Failed);
+      }
+    },
+    updatemasks: () => {
+      chatStore.updateCurrentSession((session) => {
+        const memoryPrompt = session.memoryPrompt;
+        const currentDate = new Date().toLocaleString(); // Get the current date and time as a string
+        const existingContext = session.mask.context;
+        let currentContext = existingContext[0]; // Get the current context message
+    
+        if (!currentContext || currentContext.role !== "system") {
+          // If the current context message doesn't exist or doesn't have the role "system"
+          currentContext = {
+            role: "system",
+            content: memoryPrompt,
+            date: currentDate,
+            id: "", // Generate or set the ID for the new message
+            // Add any other properties you want to set for the context messages
+          };
+          existingContext.unshift(currentContext); // Add the new message at the beginning of the context array
+          showToast(Locale.Chat.Commands.UI.MasksSuccess);
+        } else {
+          // If the current context message already exists and has the role "system"
+          currentContext.content = memoryPrompt; // Update the content
+          currentContext.date = currentDate; // Update the date
+          // You can update other properties of the current context message here
+        }
+    
+        // Set any other properties you want to update in the session
+        session.mask.context = existingContext;
+        showToast(Locale.Chat.Commands.UI.MasksSuccess);
+      });
+    },
+  });  
 
   // only search prompts when user input is short
   const SEARCH_TEXT_LIMIT = 30;
@@ -750,7 +968,12 @@ function _Chat() {
 
   const doSubmit = (userInput: string) => {
     if (userInput.trim() === "") return;
-    const matchCommand = chatCommands.match(userInput);
+
+    // reduce a zod cve CVE-2023-4316
+    const escapedInput = escapeRegExp(userInput);
+
+    const matchCommand = chatCommands.match(escapedInput);
+
     if (matchCommand.matched) {
       setUserInput("");
       setPromptHints([]);
@@ -928,21 +1151,25 @@ function _Chat() {
     });
   };
 
-  const context: RenderMessage[] = useMemo(() => {
-    return session.mask.hideContext ? [] : session.mask.context.slice();
-  }, [session.mask.context, session.mask.hideContext]);
   const accessStore = useAccessStore();
+  const isAuthorized = accessStore.isAuthorized();
+  const context: RenderMessage[] = useMemo(() => {
+    const contextMessages = session.mask.hideContext ? [] : session.mask.context.slice();
 
-  if (
-    context.length === 0 &&
-    session.messages.at(0)?.content !== BOT_HELLO.content
-  ) {
-    const copiedHello = Object.assign({}, BOT_HELLO);
-    if (!accessStore.isAuthorized()) {
-      copiedHello.content = Locale.Error.Unauthorized;
+    if (
+      contextMessages.length === 0 &&
+      session.messages.at(0)?.role !== "system"
+    ) {
+      const copiedHello = Object.assign({}, BOT_HELLO);
+      if (!isAuthorized) {
+        copiedHello.role = "system";
+        copiedHello.content = Locale.Error.Unauthorized;
+      }
+      contextMessages.push(copiedHello);
     }
-    context.push(copiedHello);
-  }
+
+    return contextMessages;
+  }, [session.mask.context, session.mask.hideContext, session.messages, isAuthorized]);
 
   // preview messages
   const renderMessages = useMemo(() => {
@@ -982,14 +1209,16 @@ function _Chat() {
     userInput,
   ]);
 
-  const [msgRenderIndex, _setMsgRenderIndex] = useState(
+  // At the top level of the component
+  // this should be fix a stupid react warning that sometimes its fucking incorrect
+  const [msgRenderIndex, _setMsgRenderIndex] = useState<number>(
     Math.max(0, renderMessages.length - CHAT_PAGE_SIZE),
   );
-  function setMsgRenderIndex(newIndex: number) {
+  const setMsgRenderIndex = useCallback((newIndex: number) => {
     newIndex = Math.min(renderMessages.length - CHAT_PAGE_SIZE, newIndex);
     newIndex = Math.max(0, newIndex);
     _setMsgRenderIndex(newIndex);
-  }
+  }, [renderMessages.length, _setMsgRenderIndex]);
 
   const messages = useMemo(() => {
     const endRenderIndex = Math.min(
@@ -999,17 +1228,19 @@ function _Chat() {
     return renderMessages.slice(msgRenderIndex, endRenderIndex);
   }, [msgRenderIndex, renderMessages]);
 
-  const onChatBodyScroll = (e: HTMLElement) => {
-    const bottomHeight = e.scrollTop + e.clientHeight;
-    const edgeThreshold = e.clientHeight;
+  const onChatBodyScroll = useCallback((e: React.UIEvent<HTMLDivElement>) => {
+    const target = e.currentTarget; // Use currentTarget instead of target
+    const bottomHeight = target.scrollTop + target.clientHeight;
+    const edgeThreshold = target.clientHeight;
 
-    const isTouchTopEdge = e.scrollTop <= edgeThreshold;
-    const isTouchBottomEdge = bottomHeight >= e.scrollHeight - edgeThreshold;
-    const isHitBottom =
-      bottomHeight >= e.scrollHeight - (isMobileScreen ? 4 : 10);
+    // Determine if the user is at the top or bottom edge of the chat.
+    const isTouchTopEdge = target.scrollTop <= edgeThreshold;
+    const isTouchBottomEdge = bottomHeight >= target.scrollHeight - edgeThreshold;
+    const isHitBottom = bottomHeight >= target.scrollHeight - (isMobileScreen ? 4 : 10);
 
-    const prevPageMsgIndex = msgRenderIndex - CHAT_PAGE_SIZE;
+    
     const nextPageMsgIndex = msgRenderIndex + CHAT_PAGE_SIZE;
+    const prevPageMsgIndex = msgRenderIndex - CHAT_PAGE_SIZE;
 
     if (isTouchTopEdge && !isTouchBottomEdge) {
       setMsgRenderIndex(prevPageMsgIndex);
@@ -1017,10 +1248,39 @@ function _Chat() {
       setMsgRenderIndex(nextPageMsgIndex);
     }
 
-    setHitBottom(isHitBottom);
-    let isAutoScrollEnabled: boolean = config.autoScrollMessage;
-    setAutoScroll(isAutoScrollEnabled);
-  };
+    // Only update state if necessary to prevent infinite loop
+    // this fix memory leaks
+    if (hitBottom !== isHitBottom) {
+      setHitBottom(isHitBottom);
+      setAutoScroll(isHitBottom);
+    }
+  }, [
+    setHitBottom,
+    setAutoScroll,
+    isMobileScreen,
+    msgRenderIndex,
+    setMsgRenderIndex, // Added setMsgRenderIndex
+    hitBottom, // Include hitBottom in the dependency array
+  ]);
+
+  // Use the custom hook to debounce the onChatBodyScroll function
+  useDebouncedEffect(() => {
+    const scrollContainer = scrollRef.current;
+    const handleScrollEvent = (event: Event) => {
+      onChatBodyScroll(event as unknown as React.UIEvent<HTMLDivElement>);
+    };
+
+    if (scrollContainer) {
+      scrollContainer.addEventListener('scroll', handleScrollEvent);
+    }
+
+    return () => {
+      if (scrollContainer) {
+        scrollContainer.removeEventListener('scroll', handleScrollEvent);
+      }
+    };
+  }, [onChatBodyScroll], 100);
+
   function scrollToBottom() {
     setMsgRenderIndex(renderMessages.length - CHAT_PAGE_SIZE);
     scrollDomToBottom();
@@ -1040,12 +1300,21 @@ function _Chat() {
   const showMaxIcon = !isMobileScreen && !clientConfig?.isApp;
 
   useCommand({
-    fill: setUserInput,
+    fill: (text) => {
+      // Call setUserInput only if text is a string
+      if (text !== undefined) {
+        setUserInput(text);
+      }
+    },
     submit: (text) => {
-      doSubmit(text);
+      // Call doSubmit only if text is a string
+      if (text !== undefined) {
+        doSubmit(text);
+      }
     },
     code: (text) => {
-      if (accessStore.disableFastLink) return;
+      // Exit if fast link is disabled or text is undefined
+      if (accessStore.disableFastLink || text === undefined) return;
       console.log("[Command] got code from url: ", text);
       showConfirm(Locale.URLCommand.Code + `code = ${text}`).then((res) => {
         if (res) {
@@ -1054,7 +1323,7 @@ function _Chat() {
       });
     },
     settings: (text) => {
-      if (accessStore.disableFastLink) return;
+      if (accessStore.disableFastLink || typeof text !== 'string') return;
 
       try {
         const payload = JSON.parse(text) as {
@@ -1064,22 +1333,22 @@ function _Chat() {
 
         console.log("[Command] got settings from url: ", payload);
 
-        if (payload.key || payload.url) {
-          showConfirm(
-            Locale.URLCommand.Settings +
-              `\n${JSON.stringify(payload, null, 4)}`,
-          ).then((res) => {
-            if (!res) return;
-            if (payload.key) {
-              accessStore.update(
-                (access) => (access.openaiApiKey = payload.key!),
-              );
+        showConfirm(
+          Locale.URLCommand.Settings +
+          `\n${JSON.stringify(payload, null, 4)}`,
+        ).then((res) => {
+          if (!res) return;
+          accessStore.update((access) => {
+            // Only update openaiApiKey if payload.key is a string
+            if (typeof payload.key === 'string') {
+              access.openaiApiKey = payload.key;
             }
-            if (payload.url) {
-              accessStore.update((access) => (access.openaiUrl = payload.url!));
+            // Only update openaiUrl if payload.url is a string
+            if (typeof payload.url === 'string') {
+              access.openaiUrl = payload.url;
             }
           });
-        }
+        });
       } catch {
         console.error("[Command] failed to get settings from url: ", text);
       }
@@ -1089,30 +1358,84 @@ function _Chat() {
   // edit / insert message modal
   const [isEditingMessage, setIsEditingMessage] = useState(false);
 
+  // TODO: The final improvement needed is to fix the "UNFINISHED_INPUT" overwriting issue that occurs when a user clicks 'start new conversation'. 
+  // After this, I will return to working on the backend with Golang.
+
+  // useRef is used to persist the previous session ID across renders without triggering a re-render.
+  const previousSessionIdRef = useRef(session.id);
+
+  useEffect(() => {
+    // Retrieve the previous session ID stored in the ref.
+    const previousSessionId = previousSessionIdRef.current;
+
+    // Check if the previous session ID is no longer present in the chat store.
+    // If it's not, it indicates that the session has been deleted and we should clear the unfinished input.
+    if (!chatStore.sessions.some(s => s.id === previousSessionId)) {
+      clearUnfinishedInputForSession(previousSessionId);
+    }
+
+    // Update the ref with the new session ID for the next render.
+    previousSessionIdRef.current = session.id;
+
+    // This cleanup function will be called when the component unmounts or when the dependencies of the effect change.
+    // It ensures that the unfinished input for the current session is cleared if the component unmounts
+    // or if the session is deleted from the chat store.
+    return () => {
+      clearUnfinishedInputForSession(session.id);
+    };
+    // The effect depends on session.id and chatStore.sessions to determine when to run.
+    // It should run when the session ID changes or when the list of sessions in the chat store updates.
+  }, [session.id, chatStore.sessions]);
+
+  // Define the key for storing unfinished input based on the session ID outside of the useEffect.
+  const key = UNFINISHED_INPUT(session.id);
+
+  // Define a function that calls the debounced function, wrapped in useCallback.
+  const saveUnfinishedInput = useCallback((input: string) => {
+    debouncedSave(input, key);
+  }, [key]);
+
+  // Call the save function whenever userInput changes.
   // remember unfinished input
   useEffect(() => {
-    // try to load from local storage
-    const key = UNFINISHED_INPUT(session.id);
+    saveUnfinishedInput(userInput);
+  }, [userInput, saveUnfinishedInput]);
+
+  // Load unfinished input when the component mounts or session ID changes.
+  useEffect(() => {
     const mayBeUnfinishedInput = localStorage.getItem(key);
     if (mayBeUnfinishedInput && userInput.length === 0) {
       setUserInput(mayBeUnfinishedInput);
-      localStorage.removeItem(key);
+      // Optionally clear the unfinished input from local storage after loading it.
+      // Note: The removal of "localStorage.removeItem(key);" here is intentional. 
+      // The preservation of input is already handled by the debounced function, which simplifies the stupid complexity.
     }
 
-    const dom = inputRef.current;
+    // Capture the current value of the input reference.
+    const currentInputRef = inputRef.current;
+
+    // This cleanup function will run when the component unmounts or the session.id changes.
     return () => {
-      localStorage.setItem(key, dom?.value ?? "");
+      // Save the current input to local storage only if it is not a command.
+      // Use the captured value from the input reference.
+      const currentInputValue = currentInputRef?.value ?? "";
+      // Save the input to local storage only if it's not empty and not a command.
+      if (currentInputValue && !currentInputValue.startsWith(ChatCommandPrefix)) {
+        localStorage.setItem(key, currentInputValue);
+      } else {
+        // If there's no value, ensure we don't create an empty key in local storage.
+        localStorage.removeItem(key);
+      }
     };
+    // The effect should depend on the session ID to ensure it runs when the session changes.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [session.id]);
 
   const handlePaste = useCallback(
     async (event: React.ClipboardEvent<HTMLTextAreaElement>) => {
       const currentModel = chatStore.currentSession().mask.modelConfig.model;
-      if (!isVisionModel(currentModel)) {
-        return;
-      }
-      const items = (event.clipboardData || window.clipboardData).items;
+      if(!isVisionModel(currentModel)){return;}
+      const items = (event.clipboardData || window.Clipboard).items;
       for (const item of items) {
         if (item.kind === "file" && item.type.startsWith("image/")) {
           event.preventDefault();
@@ -1150,49 +1473,70 @@ function _Chat() {
   );
 
   async function uploadImage() {
-    const images: string[] = [];
-    images.push(...attachImages);
-
-    images.push(
-      ...(await new Promise<string[]>((res, rej) => {
-        const fileInput = document.createElement("input");
-        fileInput.type = "file";
-        fileInput.accept =
-          "image/png, image/jpeg, image/webp, image/heic, image/heif";
-        fileInput.multiple = true;
-        fileInput.onchange = (event: any) => {
-          setUploading(true);
-          const files = event.target.files;
-          const imagesData: string[] = [];
-          for (let i = 0; i < files.length; i++) {
-            const file = event.target.files[i];
-            compressImage(file, 256 * 1024)
-              .then((dataUrl) => {
-                imagesData.push(dataUrl);
-                if (
-                  imagesData.length === 3 ||
-                  imagesData.length === files.length
-                ) {
-                  setUploading(false);
-                  res(imagesData);
-                }
-              })
-              .catch((e) => {
+    const maxImages = 3;
+    if (uploading) return;
+    new Promise<string[]>((res, rej) => {
+      const fileInput = document.createElement("input");
+      fileInput.type = "file";
+      fileInput.accept =
+        "image/png, image/jpeg, image/webp, image/heic, image/heif";
+      fileInput.multiple = true;
+      fileInput.onchange = (event: any) => {
+        setUploading(true);
+        const files = event.target.files;
+        const imagesData: string[] = [];
+        for (let i = 0; i < files.length; i++) {
+          const file = event.target.files[i];
+          compressImage(file, 256 * 1024)
+            .then((dataUrl) => {
+              imagesData.push(dataUrl);
+              if (
+                imagesData.length + attachImages.length >= maxImages ||
+                imagesData.length === files.length
+              ) {
                 setUploading(false);
-                rej(e);
-              });
-          }
-        };
-        fileInput.click();
-      })),
-    );
-
-    const imagesLength = images.length;
-    if (imagesLength > 3) {
-      images.splice(3, imagesLength - 3);
-    }
-    setAttachImages(images);
+                res(imagesData);
+              }
+            })
+            .catch((e) => {
+              rej(e);
+            });
+        }
+      };
+      fileInput.click();
+    })
+      .then((imagesData) => {
+        const images: string[] = [];
+        images.push(...attachImages);
+        images.push(...imagesData);
+        setAttachImages(images);
+        const imagesLength = images.length;
+        if (imagesLength > maxImages) {
+          images.splice(maxImages, imagesLength - maxImages);
+        }
+        setAttachImages(images);
+      })
+      .catch(() => {
+        setUploading(false);
+      });
   }
+
+  function openImageBox(src: string, alt?: string) {
+    alt = alt ?? "";
+    setImageBoxData({ src, alt });
+    setShowImageBox(true);
+  }
+
+  // this now better
+  const scrollToBottomSmooth = () => {
+    const scrollContainer = scrollRef.current;
+    if (scrollContainer) {
+      const scrollHeight = scrollContainer.scrollHeight;
+      const height = scrollContainer.clientHeight;
+      const maxScrollTop = scrollHeight - height;
+      scrollContainer.scrollTo({ top: maxScrollTop, behavior: 'smooth' });
+    }
+  };
 
   return (
     <div className={styles.chat} key={session.id}>
@@ -1240,7 +1584,17 @@ function _Chat() {
                 setShowExport(true);
               }}
             />
-          </div>
+            </div>
+          {!showMaxIcon && isApp ? (
+            <div className="window-action-button">
+              <IconButton
+                icon={<PinIcon />}
+                bordered
+                title={Locale.Chat.Actions.Pin}
+                onClick={togglePinApp} // Call the enablePinApp function
+              />
+            </div>
+          ) : null}
           {showMaxIcon && (
             <div className="window-action-button">
               <IconButton
@@ -1262,11 +1616,15 @@ function _Chat() {
           setShowModal={setShowPromptModal}
         />
       </div>
-
+      <ImageBox
+        showImageBox={showImageBox}
+        data={imageBoxData}
+        closeImageBox={() => setShowImageBox(false)}
+      ></ImageBox>
       <div
         className={styles["chat-body"]}
         ref={scrollRef}
-        onScroll={(e) => onChatBodyScroll(e.currentTarget)}
+        onScroll={onChatBodyScroll} // Pass the event directly
         onMouseDown={() => inputRef.current?.blur()}
         onTouchStart={() => {
           inputRef.current?.blur();
@@ -1276,6 +1634,9 @@ function _Chat() {
         {messages.map((message, i) => {
           const isUser = message.role === "user";
           const isContext = i < context.length;
+          const isAssistant = message.role === "assistant";
+          const isDallEModel = session.mask.modelConfig.model.startsWith("dall-e");
+
           const showActions =
             i > 0 &&
             !(message.preview || message.content.length === 0) &&
@@ -1330,6 +1691,8 @@ function _Chat() {
                       </div>
                       {isUser ? (
                         <Avatar avatar={config.avatar} />
+                      ) : isContext ? (
+                        <Avatar avatar="1f4ab" /> // Add this line for system messages
                       ) : (
                         <>
                           {["system"].includes(message.role) ? (
@@ -1389,11 +1752,13 @@ function _Chat() {
                       </div>
                     )}
                   </div>
-                  {showTyping && (
+                  {showTyping && (isAssistant || isUser) ? (
                     <div className={styles["chat-message-status"]}>
-                      {Locale.Chat.Typing}
+                      {isAssistant && isDallEModel
+                        ? Locale.Chat.GeneratingImage
+                        : Locale.Chat.Typing}
                     </div>
-                  )}
+                  ) : null}
                   <div className={styles["chat-message-item"]}>
                     <Markdown
                       content={getMessageTextContent(message)}
@@ -1410,12 +1775,19 @@ function _Chat() {
                       fontSize={fontSize}
                       parentRef={scrollRef}
                       defaultShow={i >= messages.length - 6}
+                      openImageBox={openImageBox}
                     />
                     {getMessageImages(message).length == 1 && (
+                      // this fix when uploading
+                      // Note: ignore a fucking stupid "1750:23  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element"
+                      // In scenario how it work, this already handle in other side for example, when you use gemini-pro-vision
                       <img
                         className={styles["chat-message-item-image"]}
                         src={getMessageImages(message)[0]}
                         alt=""
+                        onClick={() =>
+                          openImageBox(getMessageImages(message)[0])
+                        }
                       />
                     )}
                     {getMessageImages(message).length > 1 && (
@@ -1429,13 +1801,15 @@ function _Chat() {
                       >
                         {getMessageImages(message).map((image, index) => {
                           return (
-                            <img
+                            <Image
                               className={
                                 styles["chat-message-item-image-multi"]
                               }
                               key={index}
                               src={image}
                               alt=""
+                              layout="responsive"
+                              onClick={() => openImageBox(image)}
                             />
                           );
                         })}
@@ -1445,8 +1819,8 @@ function _Chat() {
 
                   <div className={styles["chat-message-action-date"]}>
                     {isContext
-                      ? Locale.Chat.IsContext
-                      : message.date.toLocaleString()}
+                      ? `${Locale.Chat.IsContext}${!isMobileScreen ? ` - ${Locale.Exporter.Model}: ${message.model || session.mask.modelConfig.model}` : ''}`
+                      : `${Locale.Exporter.Time}: ${message.date.toLocaleString()}${!isMobileScreen ? ` - ${Locale.Exporter.Model}: ${message.model || session.mask.modelConfig.model}` : ''}`}
                   </div>
                 </div>
               </div>
@@ -1464,7 +1838,7 @@ function _Chat() {
           setAttachImages={setAttachImages}
           setUploading={setUploading}
           showPromptModal={() => setShowPromptModal(true)}
-          scrollToBottom={scrollToBottom}
+          scrollToBottom={scrollToBottomSmooth}
           hitBottom={hitBottom}
           uploading={uploading}
           showPromptHints={() => {
@@ -1478,6 +1852,9 @@ function _Chat() {
             setUserInput("/");
             onSearch("");
           }}
+          showContextPrompts={false}
+          toggleContextPrompts={() => showToast(Locale.WIP)}
+          attachImages={attachImages}
         />
         <label
           className={`${styles["chat-input-panel-inner"]} ${
@@ -1512,6 +1889,7 @@ function _Chat() {
                     key={index}
                     className={styles["attach-image"]}
                     style={{ backgroundImage: `url("${image}")` }}
+                    onClick={() => openImageBox(image)}
                   >
                     <div className={styles["attach-image-mask"]}>
                       <DeleteImageButton

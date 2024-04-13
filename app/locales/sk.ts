@@ -88,7 +88,12 @@ const sk: PartialLocaleType = {
     Copy: "Kopírovať všetko",
     Download: "Stiahnuť",
     MessageFromYou: "Správa od vás",
-    MessageFromChatGPT: "Správa od ChatGPT",
+    MessageFromChatGPT: {
+      NoRole: "Správa od ChatGPT",
+      RoleAssistant: "Asistent",
+      RoleSystem: "Systém",
+      SysMemoryPrompt: "Výzva systémovej pamäte",
+    },
     Share: "Zdieľať na ShareGPT",
     Format: {
       Title: "Formát exportu",
@@ -179,6 +184,10 @@ const sk: PartialLocaleType = {
       Title: "Bublina náhľadu odoslania",
       SubTitle: "Náhľad markdownu v bubline",
     },
+    AutoScrollMessage: {
+      Title: "Odpoveď s automatickým posúvaním",
+      SubTitle: "Posúvať správu počas odpovedania",
+    },
     AutoGenerateTitle: {
       Title: "Automaticky generovať názov",
       SubTitle: "Generovať vhodný názov na základe obsahu konverzácie",
@@ -208,9 +217,23 @@ const sk: PartialLocaleType = {
         },
 
         WebDav: {
-          Endpoint: "Koncový bod WebDAV",
-          UserName: "Meno používateľa",
-          Password: "Heslo",
+          Endpoint: {
+            Name: "WebDav Koncový Bod",
+            SubTitle: "Nastavenie WebDav Koncového Bodu",
+          },
+          UserName: {
+            Name: "Používateľské Meno",
+            SubTitle: "Nastavenie Používateľského Meno",
+          },
+          Password: {
+            Name: "Heslo",
+            SubTitle: "Nastavenie Hesla",
+          },
+          FileName: {
+            Name: "Názov Súboru",
+            SubTitle:
+              "Názov súboru, napríklad: backtrackz.json (musí byť JSON súbor)",
+          },
         },
 
         UpStash: {
@@ -225,10 +248,6 @@ const sk: PartialLocaleType = {
         return `${overview.chat} chaty, ${overview.message} správy, ${overview.prompt} výzvy, ${overview.mask} masky`;
       },
       ImportFailed: "Import z súboru zlyhal",
-    },
-    AutoScrollMessage: {
-      Title: "Auto-Scroll Reply",
-      SubTitle: "Scroll the message during reply",
     },
     Mask: {
       Splash: {
@@ -319,23 +338,6 @@ const sk: PartialLocaleType = {
         ApiVerion: {
           Title: "Verzia API Azure",
           SubTitle: "Skontrolujte svoju verziu API v Azure konzole",
-        },
-      },
-      Anthropic: {
-        ApiKey: {
-          Title: "API kľúč Anthropic",
-          SubTitle: "Skontrolujte svoj API kľúč v Anthropic konzole",
-          Placeholder: "API kľúč Anthropic",
-        },
-
-        Endpoint: {
-          Title: "Adresa koncového bodu",
-          SubTitle: "Príklad:",
-        },
-
-        ApiVerion: {
-          Title: "Verzia API (claude verzia API)",
-          SubTitle: "Vyberte špecifickú verziu časti",
         },
       },
       CustomModel: {

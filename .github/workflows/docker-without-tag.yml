@@ -1,0 +1,125 @@
+#################################################
+# Author : @H0llyW00dzZ                         #
+# Note : This Using Github Container            #
+# Which Pretty useful for GitHub pro plans      #
+#################################################
+name: Publish Docker image (Without Tag Released)
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag_version:
+        description: 'Enter the tag version for the Docker image'
+        required: true
+      description:
+        description: 'Enter the description for the Docker image'
+        required: true
+      build_reverse_proxy:
+        description: 'Build Go reverse proxy? (yes/no)'
+        default: 'no'
+        required: true
+      go_reverse_proxy_tag:
+        description: 'Enter the tag for the go-reverse-proxy repository (optional)'
+        required: false
+  release:
+      types: [published]
+
+jobs:
+  push_to_registry:
+    name: Push Docker image to GitHub Container Registry
+    runs-on: ubuntu-latest
+
+    steps:
+      - # This CI / CD Docker Builder with multi-repo
+        name: Check out ChatGPT-Next-Web repo
+        uses: actions/checkout@v3
+        with:
+          repository: ${{ github.repository_owner }}/ChatGPT-Next-Web
+          ref: main
+
+      -
+        name: Check out go-reverse-proxy repo
+        if: ${{ github.event.inputs.build_reverse_proxy == 'yes' }}
+        uses: actions/checkout@v3
+        with:
+          repository: ${{ github.repository_owner }}/go-reverse-proxy
+          ref: master
+          path: ${{ runner.workspace }}/ChatGPT-Next-Web/go-reverse-proxy
+
+      -
+          name: Copy go sum
+          if: ${{ github.event.inputs.build_reverse_proxy == 'yes' }}
+          run: |
+              cp ${{ runner.workspace }}/ChatGPT-Next-Web/go-reverse-proxy/go.sum ${{ runner.workspace }}/ChatGPT-Next-Web
+      -
+        name: Set up Go
+        if: ${{ github.event.inputs.build_reverse_proxy == 'yes' }}
+        uses: actions/setup-go@v4
+        with:
+          go-version: '1.21.3'
+        env:
+          NODE_VERSION: 18
+          working-directory: ${{ runner.workspace }}/ChatGPT-Next-Web/go-reverse-proxy
+
+
+      -
+        name: Log in to GitHub Container Registry
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - 
+          name: Extract metadata (tags, labels) for Docker
+          id: meta
+          uses: docker/metadata-action@v4
+          with:
+            images: h0llyw00dzz/chatgpt-next-web
+            tags: |
+              type=raw,value=latest
+              type=ref,event=tag
+
+      -
+        name: Set up QEMU
+        uses: docker/setup-qemu-action@v2
+
+      - 
+        name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+      
+      - # not ready
+        name: Build and push Docker image with reverse proxy
+        if: ${{ github.event.inputs.build_reverse_proxy == 'yes' }}
+        uses: docker/build-push-action@v4
+        with:
+          context: ${{ runner.workspace }}/ChatGPT-Next-Web/go-reverse-proxy
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: ghcr.io/h0llyw00dzz/chatgpt-next-web:${{ github.event.inputs.go_reverse_proxy_tag }}
+          labels: |
+            ${{ steps.meta.outputs.labels }}
+            org.opencontainers.image.description="${{ github.event.inputs.description }}"
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+      
+      - 
+        name: Build and push Docker image
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: | 
+            ghcr.io/h0llyw00dzz/chatgpt-next-web:${{ github.event.inputs.tag_version }}
+            ghcr.io/h0llyw00dzz/chatgpt-next-web:latest
+          labels: |
+            ${{ steps.meta.outputs.labels }}
+            org.opencontainers.image.description="${{ github.event.inputs.description }}"
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+      # This ensures the cleanup runs even if the build fails
+      -
+          name: Clean up Buildx builder
+          if: always()
+          run: docker buildx rm

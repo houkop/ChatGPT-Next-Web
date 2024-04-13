@@ -4,8 +4,28 @@ import { PartialLocaleType } from "./index";
 const id: PartialLocaleType = {
   WIP: "Coming Soon...",
   Error: {
-    Unauthorized:
-      "Akses tidak diizinkan, silakan masukkan kode akses atau masukkan kunci API OpenAI Anda. di halaman [autentikasi](/#/auth) atau di halaman [Pengaturan](/#/settings).",
+    Unauthorized: "Akses tidak diizinkan, silakan masukkan kode akses atau masukkan kunci API OpenAI Anda. di halaman [autentikasi](/#/auth) atau di halaman [Pengaturan](/#/settings).",
+    Content_Policy: {
+      Title:
+        "Permintaan Anda ditandai karena Pelanggaran Kebijakan Konten.",
+      SubTitle:
+        "Baca selengkapnya di sini: https://platform.openai.com/docs/guides/moderation/overview",
+      Reason: {
+        Title: "Alasan",
+        sexual: "Seksual",
+        hate: "Kebencian",
+        harassment: "Pelecehan",
+        "self-harm": "Melukai diri sendiri",
+        "sexual/minors": "Seksual/anak-anak",
+        "hate/threatening": "Kebencian/ancaman",
+        "violence/graphic": "Kekerasan/grafis",
+        "self-harm/intent": "Melukai diri sendiri/niat",
+        "self-harm/instructions": "Melukai diri sendiri/instruksi",
+        "harassment/threatening": "Pelecehan/ancaman",
+        violence: "Kekerasan",
+      },
+    },
+    TextModerationErr: "Kami menemui masalah saat meninjau pesan Anda:",
   },
   Auth: {
     Title: "Diperlukan Kode Akses",
@@ -30,6 +50,10 @@ const id: PartialLocaleType = {
       Pin: "Pin",
       PinToastContent: "2 pesan telah ditandai",
       PinToastAction: "Lihat",
+      PinAppContent: {
+        Pinned : "Aplikasi Desktop sekarang dipasangkan",
+        UnPinned: "Aplikasi Desktop tidak lagi dipasangkan",
+      },  
       Delete: "Hapus",
       Edit: "Edit",
     },
@@ -38,8 +62,21 @@ const id: PartialLocaleType = {
       newm: "Mulai Chat Baru dengan Masks",
       next: "Chat Selanjutnya",
       prev: "Chat Sebelumnya",
+      restart: "Restart klien",
       clear: "Bersihkan Percakapan",
       del: "Hapus Chat",
+      save: "Simpan Percakapan Sesi Saat Ini",
+      load: "Muat Percakapan Sesi",
+      copymemoryai: "Salin sesi memori prompt AI",
+      updatemasks: "Perbarui sesi memori prompt untuk sebuah Masks",
+      summarize: "Rangkum sesi obrolan saat ini",
+      UI: {
+        MasksSuccess: "Berhasil memperbarui sesi Masks",
+        MasksFail: "Gagal memperbarui sesi Masks",
+        Summarizing: "Meringkas sesi percakapan ini",
+        SummarizeSuccess: "Berhasil merangkum sesi obrolan ini",
+        SummarizeFail: "Gagal merangkum sesi obrolan ini",
+      },
     },
     InputActions: {
       Stop: "Berhenti",
@@ -56,6 +93,7 @@ const id: PartialLocaleType = {
     },
     Rename: "Ubah Nama Chat",
     Typing: "Mengetik...",
+    GeneratingImage: "Menghasilkan Gambar...",
     Input: (submitKey: string) => {
       var inputHints = `${submitKey} untuk mengirim`;
       if (submitKey === String(SubmitKey.Enter)) {
@@ -76,7 +114,12 @@ const id: PartialLocaleType = {
     Copy: "Salin Semua",
     Download: "Unduh",
     MessageFromYou: "Pesan dari Anda",
-    MessageFromChatGPT: "Pesan dari ChatGPT",
+    MessageFromChatGPT: {
+      NoRole: "Pesan Dari ChatGPT",
+      RoleAssistant: "Asisten",
+      RoleSystem: "Sistem",
+      SysMemoryPrompt: "Prompt Memori Sistem",
+    },
     Share: "Bagikan ke ShareGPT",
     Format: {
       Title: "Format Ekspor",
@@ -85,6 +128,10 @@ const id: PartialLocaleType = {
     IncludeContext: {
       Title: "Sertakan Konteks",
       SubTitle: "Apakah akan menyertakan masks",
+    },
+    IncludeSysMemoryPrompt: {
+      Title: "Termasuk Prompt Memori Sistem",
+      SubTitle: "Ekspor prompt memori sistem dalam mask atau tidak",
     },
     Steps: {
       Select: "Pilih",
@@ -111,6 +158,7 @@ const id: PartialLocaleType = {
     DeleteChat: "Anda yakin ingin menghapus percakapan yang dipilih?",
     DeleteToast: "Percakapan telah dihapus",
     Revert: "Kembali",
+    Search: "Masukkan kata kunci filter",
   },
   Settings: {
     Title: "Pengaturan",
@@ -157,10 +205,17 @@ const id: PartialLocaleType = {
       IsChecking: "Memeriksa pembaruan...",
       FoundUpdate: (x: string) => `Versi terbaru ditemukan: ${x}`,
       GoToUpdate: "Perbarui Sekarang",
+      IsUpdating: "Memperbarui...",
+      UpdateSuccessful: "Versi telah diperbarui ke versi terbaru",
+      UpdateFailed: "Pembaruan Gagal",
     },
     AutoGenerateTitle: {
       Title: "Hasilkan Judul Otomatis",
       SubTitle: "Hasilkan judul yang sesuai berdasarkan konten percakapan",
+    },
+    SpeedAnimation: {
+      Title: "Kecepatan Respon Animasi",
+      SubTitle: "Kecepatan Respon Animasi memungkinkan Anda mengontrol seberapa cepat teks respon ditampilkan selama animasi",
     },
     Sync: {
       CloudState: "Pembaruan Terakhir",
@@ -186,14 +241,93 @@ const id: PartialLocaleType = {
           SubTitle: "Hanya berlaku untuk Proxy CORS bawaan untuk proyek ini",
         },
 
+        AccessControl: {
+          Title: "Aktifkan Kontrol Akses Timpa",
+          SubTitle:
+            "Hanya berlaku untuk pengaturan kontrol akses timpa seperti kode akses",
+        },
+        LockClient: {
+          Title: "Aktifkan Jangan Sinkronkan Data Saat Ini",
+          SubTitle:
+            "Hanya menyinkronkan data dari sumber lain, bukan data saat ini",
+        },
+
         WebDav: {
-          Endpoint: "Lokasi Titik Akhir WebDAV",
-          UserName: "User Pengguna",
-          Password: "Kata Sandi",
+          Endpoint: {
+            Name: "Titik Akhir WebDav",
+            SubTitle: "Konfigurasikan Titik Akhir WebDav",
+          },
+          UserName: {
+            Name: "Nama Pengguna",
+            SubTitle: "Konfigurasikan Nama Pengguna",
+          },
+          Password: {
+            Name: "Kata Sandi",
+            SubTitle: "Konfigurasikan Kata Sandi",
+          },
+          FileName: {
+            Name: "Nama File",
+            SubTitle:
+              "Nama File, misalnya: backtrackz.json (harus berupa file JSON)",
+          },
+        },
+        GithubGist: {
+          GistID: {
+            Name: "Github Gist ID",
+            SubTitle:
+              "Lokasi ID Gist Anda, misalnya: gist.github.com/H0llyW00dzZ/<gistid>/dll. Salin <gistid> dan tempelkan di sini.",
+          },
+          FileName: {
+            Name: "Nama File",
+            SubTitle:
+              "Nama File, misalnya: backtrackz.json (harus berupa file JSON)",
+          },
+          AccessToken: {
+            Name: "Token Akses",
+            SubTitle:
+              "Pastikan Anda memiliki izin untuk sinkronisasi. Aktifkan Privat & Publik di sana.",
+          },
+        },
+
+        GoSync: {
+          Endpoint: "URL GoSync REST",
+          UserName: "Nama Backup",
+          Password: "Token GoSync REST",
+          FileName: "Nama File",
+        },
+
+      },
+      LocalState: "Data Lokal",
+      Overview: (overview: any) => {
+        return `${overview.chat} percakapan, ${overview.message} pesan, ${overview.prompt} prompt, ${overview.mask} masks`;
+      },
+      Description: {
+        Chat: (overview: any) => {
+          const title = "Percakapan";
+          const description = `${overview.chat} percakapan, ${overview.message} pesan`;
+          return { title, description };
+        },
+        Prompt: (overview: any) => {
+          const title = "Prompts";
+          const description = `${overview.prompt} Prompts`;
+          return { title, description };
+        },
+        Masks: (overview: any) => {
+          const title = "Masks";
+          const description = `${overview.mask} masks`;
+          return { title, description };
         },
       },
+      ImportFailed: "Gagal mengimpor dari file",
+      ImportChatSuccess: "Data chat berhasil diimpor.",
+      ImportPromptsSuccess: "Impor data Prompts berhasil.",
     },
     SendKey: "Kirim",
+    PinAppKey: "Tombol pintas Aplikasi",
+    SystemPromptTemplate: {
+      Title: "Template Perintah Sistem",
+      SubTitle: "Sebuah template perintah sistem untuk setiap permintaan. Ini dapat menggunakan bahasa lokal. Jika bahasa tidak terdaftar, maka bahasa default (Inggris) akan digunakan.",
+    },
     Theme: "Tema",
     TightBorder: "Batas Ketat",
     SendPreviewBubble: {
@@ -201,8 +335,8 @@ const id: PartialLocaleType = {
       SubTitle: "Pratinjau Obrolan dengan markdown",
     },
     AutoScrollMessage: {
-      Title: "Auto-Scroll Reply",
-      SubTitle: "Scroll the message during reply",
+      Title: "Balasan Auto-Scroll",
+      SubTitle: "Gulir pesan saat membalas",
     },
     Mask: {
       Splash: {
@@ -246,12 +380,15 @@ const id: PartialLocaleType = {
     Usage: {
       Title: "Saldo Akun",
       SubTitle(used: any, total: any) {
-        return `Digunakan bulan ini: ${used}, total langganan: ${total}`;
+        const hardLimitusd = total.hard_limit_usd !== undefined ? new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'USD' }).format(total.hard_limit_usd) : "tidak diketahui";
+        const hardLimit = total.system_hard_limit_usd !== undefined ? new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'USD' }).format(total.system_hard_limit_usd) : "tidak diketahui";
+        const usedFormatted = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'USD' }).format(used);
+        return `Digunakan bulan ini ${usedFormatted}, Batas maksimum ${hardLimitusd}, Batas penggunaan yang disetujui ${hardLimit}`;
       },
       IsChecking: "Memeriksa...",
       Check: "Periksa",
-      NoAccess: "Masukkan kunci API untuk memeriksa saldo",
-    },
+      NoAccess: `Masukkan Kunci Sesi pada Kunci API yang dimulai dengan awalan "sess-" untuk memeriksa saldo.`,
+    }, 
 
     Model: "Model",
     Temperature: {
@@ -266,6 +403,10 @@ const id: PartialLocaleType = {
       Title: "Token Maksimum",
       SubTitle: "Panjang maksimum token input dan output",
     },
+    UseMaxTokens: {
+      Title: "Gunakan Jumlah Token Maksimum",
+      SubTitle: "Apakah akan menggunakan jumlah maksimum token.",
+    },
     PresencePenalty: {
       Title: "Penalti Kehadiran",
       SubTitle: "Semakin tinggi nilai, semakin mungkin topik baru muncul",
@@ -274,6 +415,30 @@ const id: PartialLocaleType = {
       Title: "Penalti Frekuensi",
       SubTitle:
         "Semakin tinggi nilai, semakin rendah kemungkinan penggunaan ulang baris yang sama",
+    },
+    TextModeration: {
+      Title: "Moderasi Teks",
+      SubTitle: "Moderasi Teks untuk memeriksa apakah konten sesuai dengan kebijakan penggunaan OpenAI.",
+    },
+    NumberOfImages: {
+      Title: "Buat Jumlah Gambar",
+      SubTitle:
+        "Sejumlah gambar yang akan dihasilkan\nHarus di antara 1 dan 10. Untuk dall-e-3, hanya 1 yang didukung.",
+    },
+    QualityOfImages: {
+      Title: "Buat Kualitas Gambar",
+      SubTitle:
+        "Kualitas gambar yang akan dihasilkan\nKonfigurasi ini hanya didukung untuk dall-e-3.",
+    },
+    SizeOfImages: {
+      Title: "Ukuran Gambar",
+      SubTitle:
+        "Ukuran gambar yang dihasilkan\nDALL·E-2: Harus menjadi salah satu dari `256x256`, `512x512`, atau `1024x1024`.\nDALL-E-3: Harus menjadi salah satu dari `1024x1024`, `1792x1024`, atau `1024x1792`.",
+    },
+    StyleOfImages: {
+      Title: "Gaya Gambar",
+      SubTitle:
+        "Gaya gambar yang dihasilkan\nHarus menjadi salah satu dari cerah atau alami\nKonfigurasi ini hanya didukung untuk dall-e-3",
     },
   },
   Store: {
@@ -285,8 +450,9 @@ const id: PartialLocaleType = {
         "Ini adalah ringkasan singkat dari riwayat percakapan: " + content,
       Topic:
         "Buat judul berisi empat hingga lima kata untuk percakapan kita yang tidak akan disertakan dalam ringkasan percakapan, seperti instruksi, format, kutipan, tanda baca awal, tanda kutip pendahuluan, atau karakter tambahan. Silakan coba dengan kutipan berakhir.",
-      Summarize:
-        "Buat ringkasan percakapan dalam 200 kata yang akan digunakan sebagai promp di masa depan.",
+      Summarize: // Ditingkatkan oleh H0llyW00dzZ Ref: https://github.com/H0llyW00dzZ/GoGenAI-Terminal-Chat
+        "Dalam 200 kata atau kurang, sediakan ringkasan singkat tentang diskusi yang sedang berlangsung.\n" +
+        "Ringkasan ini akan dijadikan sebagai petunjuk kontekstual untuk referensi di interaksi masa depan",
     },
   },
   Copy: {
@@ -310,6 +476,10 @@ const id: PartialLocaleType = {
   },
   FineTuned: {
     Sysmessage: "Anda adalah asisten yang",
+  },
+  PrivacyPage: {
+    Name: "Privasi",
+    Confirm: "Setuju",
   },
   Mask: {
     Name: "Masks",
@@ -345,6 +515,14 @@ const id: PartialLocaleType = {
       HideContext: {
         Title: "Sembunyikan Prompt Konteks",
         SubTitle: "Tidak menampilkan prompt konteks dalam obrolan",
+        UnHide: "Tampilkan Prompt konteks dalam obrolan",
+        Hide: "Sembunyikan Prompt konteks dalam obrolan",
+      },
+      ShowFullChatHistory: {
+        Title: "Tampilkan Seluruh Riwayat Obrolan",
+        SubTitle: "Tampilkan riwayat obrolan lengkap",
+        UnHide: "Perlihatkan seluruh riwayat obrolan",
+        Hide: "Sembunyikan seluruh riwayat obrolan (Hanya tampilkan 15 pesan terakhir)",
       },
       Share: {
         Title: "Bagikan Masks Ini",
@@ -369,13 +547,29 @@ const id: PartialLocaleType = {
     Cancel: "Batal",
     Close: "Tutup",
     Create: "Buat",
+    Continue: "Lanjutkan",
     Edit: "Edit",
+    Manage: "Kelola",
+  },
+  // don't linting this `System_Template` keep format like this
+  // this a object not string
+  System_Template: `
+Anda adalah ChatGPT, sebuah model bahasa besar yang dilatih oleh {{ServiceProvider}}.
+Batas pengetahuan: {{cutoff}}
+Model saat ini: {{model}}
+Waktu saat ini: {{time}}
+Latex inline: $x^2$ 
+Latex block: $$e=mc^2$$`,
+  Label_System_Template: {
+    Default: "Template Sistem Standar",
+    Local: "Template Sistem Lokal",
   },
   Exporter: {
     Description: {
       Title: "Hanya pesan setelah menghapus konteks yang akan ditampilkan",
     },
     Model: "Model",
+    ServiceProvider: "Penyedia Layanan",
     Messages: "Pesan",
     Topic: "Topik",
     Time: "Tanggal & Waktu",

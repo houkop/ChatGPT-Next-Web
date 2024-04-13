@@ -20,7 +20,7 @@ const tw = {
     Later: "稍候再說",
   },
   ChatItem: {
-    ChatItemCount: (count: number) => `${count} 則對話`,
+    ChatItemCount: (count: number) => `${count} 一則對話`,
   },
   Chat: {
     SubTitle: (count: number) => `您已經與 ChatGPT 進行了 ${count} 則對話`,
@@ -88,7 +88,12 @@ const tw = {
     Download: "下載檔案",
     Share: "分享到 ShareGPT",
     MessageFromYou: "來自您的訊息",
-    MessageFromChatGPT: "來自 ChatGPT 的訊息",
+    MessageFromChatGPT: {
+      NoRole: "來自ChatGPT的訊息",
+      RoleAssistant: "助理",
+      RoleSystem: "系統",
+      SysMemoryPrompt: "系統記憶提示",
+    },
     Format: {
       Title: "導出格式",
       SubTitle: "可以導出 Markdown 文本或者 PNG 圖片",
@@ -177,6 +182,10 @@ const tw = {
       Title: "預覽氣泡",
       SubTitle: "在預覽氣泡中預覽 Markdown 內容",
     },
+    AutoScrollMessage: {
+      Title: "自動滾動回覆",
+      SubTitle: "回覆時滾動訊息",
+    },
     AutoGenerateTitle: {
       Title: "自動生成標題",
       SubTitle: "根據對話內容生成合適的標題",
@@ -217,16 +226,13 @@ const tw = {
           Password: "UpStash Redis REST Token",
         },
       },
+      
 
       LocalState: "本地資料",
       Overview: (overview: any) => {
         return `${overview.chat} 次對話，${overview.message} 條消息，${overview.prompt} 條提示詞，${overview.mask} 個面具`;
       },
       ImportFailed: "導入失敗",
-    },
-    AutoScrollMessage: {
-      Title: "Auto-Scroll Reply",
-      SubTitle: "Scroll the message during reply",
     },
     Mask: {
       Splash: {
@@ -268,11 +274,14 @@ const tw = {
     Usage: {
       Title: "帳戶餘額",
       SubTitle(used: any, total: any) {
-        return `本月已使用 $${used}，訂閱總額 $${total}`;
+        const hardLimitusd = total.hard_limit_usd !== undefined ? new Intl.NumberFormat('zh-CN', { style: 'currency', currency: 'USD' }).format(total.hard_limit_usd) : "未知";
+        const hardLimit = total.system_hard_limit_usd !== undefined ? new Intl.NumberFormat('zh-CN', { style: 'currency', currency: 'USD' }).format(total.system_hard_limit_usd) : "未知";
+        const usedFormatted = new Intl.NumberFormat('zh-CN', { style: 'currency', currency: 'USD' }).format(used);
+        return `本月使用金额：${usedFormatted}，硬限制金额：${hardLimitusd}，批准使用限额：${hardLimit}`;
       },
       IsChecking: "正在檢查…",
       Check: "重新檢查",
-      NoAccess: "輸入 API Key 檢視餘額",
+      NoAccess: `輸入以"sess-"為前綴的API金鑰中的會話金鑰以檢查餘額。`,
     },
 
     Access: {
@@ -316,23 +325,6 @@ const tw = {
         ApiVerion: {
           Title: "接口版本 (azure api version)",
           SubTitle: "選擇指定的部分版本",
-        },
-      },
-      Anthropic: {
-        ApiKey: {
-          Title: "API 密鑰",
-          SubTitle: "從 Anthropic AI 獲取您的 API 密鑰",
-          Placeholder: "Anthropic API Key",
-        },
-
-        Endpoint: {
-          Title: "終端地址",
-          SubTitle: "示例：",
-        },
-
-        ApiVerion: {
-          Title: "API 版本 (claude api version)",
-          SubTitle: "選擇一個特定的 API 版本输入",
         },
       },
       Google: {
@@ -410,6 +402,10 @@ const tw = {
   },
   Plugin: { Name: "外掛" },
   FineTuned: { Sysmessage: "你是一個助手" },
+  PrivacyPage: {
+    Name: "隱私",
+    Confirm: "同意",
+  },
   Mask: {
     Name: "面具",
     Page: {
@@ -469,6 +465,7 @@ const tw = {
     Cancel: "取消",
     Close: "關閉",
     Create: "新增",
+    Continue: "繼續",
     Edit: "編輯",
     Export: "導出",
     Import: "導入",
@@ -488,8 +485,8 @@ const tw = {
 
 type DeepPartial<T> = T extends object
   ? {
-      [P in keyof T]?: DeepPartial<T[P]>;
-    }
+    [P in keyof T]?: DeepPartial<T[P]>;
+  }
   : T;
 
 export type LocaleType = typeof tw;

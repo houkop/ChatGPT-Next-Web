@@ -8,7 +8,7 @@ export const FETCH_COMMIT_URL = `https://api.github.com/repos/${OWNER}/${REPO}/c
 export const FETCH_TAG_URL = `https://api.github.com/repos/${OWNER}/${REPO}/tags?per_page=1`;
 export const RUNTIME_CONFIG_DOM = "danger-runtime-config";
 
-export const DEFAULT_API_HOST = "https://api.nextchat.dev";
+export const DEFAULT_API_HOST = "https://api.openai.com/api/proxy/";
 export const OPENAI_BASE_URL = "https://api.openai.com";
 export const ANTHROPIC_BASE_URL = "https://api.anthropic.com";
 
@@ -17,6 +17,8 @@ export const GEMINI_BASE_URL = "https://generativelanguage.googleapis.com/";
 export enum Path {
   Home = "/",
   Chat = "/chat",
+  PrivacyPage = "/privacy",
+  ChangeLog = "/changelog",
   Settings = "/settings",
   NewChat = "/new-chat",
   Masks = "/masks",
@@ -33,7 +35,7 @@ export enum SlotID {
   AppBody = "app-body",
   CustomModel = "custom-model",
 }
-
+// This will automatically generate JSON files without the need to include the ".json" extension.
 export enum FileName {
   Masks = "masks.json",
   Prompts = "prompts.json",
@@ -69,6 +71,7 @@ export enum ServiceProvider {
   OpenAI = "OpenAI",
   Azure = "Azure",
   Google = "Google",
+  Custom = "Custom",
   Anthropic = "Anthropic",
 }
 
@@ -87,6 +90,17 @@ export const Anthropic = {
 
 export const OpenaiPath = {
   ChatPath: "v1/chat/completions",
+  // text moderation
+  ModerationPath: "v1/moderations",
+  TextModerationModels: {
+    latest: "text-moderation-latest",
+    stable: "text-moderation-stable",
+  },
+  // image creation (dalle models)
+  ImageCreationPath: "v1/images/generations",
+  // todo
+  ImageEditPath: "v1/images/edits",
+  ImageVariationPath: "v1/images/variations",
   UsagePath: "dashboard/billing/usage",
   SubsPath: "dashboard/billing/subscription",
   ListModelPath: "v1/models",
@@ -105,14 +119,10 @@ export const Google = {
 };
 
 export const DEFAULT_INPUT_TEMPLATE = `{{input}}`; // input / time / model / lang
-// export const DEFAULT_SYSTEM_TEMPLATE = `
-// You are ChatGPT, a large language model trained by {{ServiceProvider}}.
-// Knowledge cutoff: {{cutoff}}
-// Current model: {{model}}
-// Current time: {{time}}
-// Latex inline: $x^2$
-// Latex block: $$e=mc^2$$
-// `;
+// In latest refactor for google ai (by H0llyW00dzZ), we can use this template to generate the default system message as pass context prompt
+// otherwise, we can configure this by costumize the default system message in the settings page
+// example configure this by costumize the default system message in the settings page
+// just change a chatgpt and "OPENAI" to "GOOGLE" and "GEMINI-PRO"
 export const DEFAULT_SYSTEM_TEMPLATE = `
 You are ChatGPT, a large language model trained by {{ServiceProvider}}.
 Knowledge cutoff: {{cutoff}}
@@ -138,6 +148,24 @@ export const KnowledgeCutOffDate: Record<string, string> = {
 };
 
 export const DEFAULT_MODELS = [
+  {
+    name: "dall-e-2",
+    available: true,
+    provider: {
+      id: "openai",
+      providerName: "OpenAI",
+      providerType: "openai",
+    },
+  },
+  {
+    name: "dall-e-3",
+    available: true,
+    provider: {
+      id: "openai",
+      providerName: "OpenAI",
+      providerType: "openai",
+    },
+  },
   {
     name: "gpt-4-turbo",
     available: true,

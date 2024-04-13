@@ -9,3 +9,6 @@ updates:
     directory: "/" # Location of package manifests
     schedule:
       interval: "weekly"
+      # Had to ignoring this as security professional
+      ignore:
+          - dependency-name: "@babel/traverse"
