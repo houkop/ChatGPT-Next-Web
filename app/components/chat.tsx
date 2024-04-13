@@ -455,10 +455,7 @@ function ChatAction(props: {
   );
 }
 
-function useScrollToBottom(
-  scrollRef: RefObject<HTMLDivElement>,
-  detach: boolean = false,
-) {
+function useScrollToBottom() {
   // for auto-scroll
   const scrollRef = useRef<HTMLDivElement>(null);
   const [autoScroll, setAutoScroll] = useState(true);
@@ -473,9 +470,6 @@ function useScrollToBottom(
     userHasScrolledUp.current = !isAtBottom;
   }
 
-  const [autoScroll, setAutoScroll] = useState(true);
-  const config = useAppConfig();
-  let isAutoScrollEnabled: boolean = config.autoScrollMessage;
   function scrollDomToBottom() {
     const dom = scrollRef.current;
     if (dom && !userHasScrolledUp.current) {

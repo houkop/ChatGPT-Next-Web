@@ -706,6 +706,6 @@ Latex block: $$e=mc^2$$`,
     Code: "Detected access code from url, confirm to apply? ",
     Settings: "Detected settings from url, confirm to apply?",
   },
-};
+},
 
 export default en;
