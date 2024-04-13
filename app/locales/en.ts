@@ -357,10 +357,6 @@ const en: LocaleType = {
       ImportChatSuccess: "Chat data imported successfully.",
       ImportPromptsSuccess: "Prompts data imported successfully.",
     },
-    AutoScrollMessage: {
-      Title: "Auto-Scroll Reply",
-      SubTitle: "Scroll the message during reply", 
-    },
     Mask: {
       Splash: {
         Title: "Mask Splash Screen",
@@ -472,23 +468,6 @@ const en: LocaleType = {
         Title: "Custom Models",
         SubTitle: "Custom model options, seperated by comma",
       },
-      Google: {
-        ApiKey: {
-          Title: "API Key",
-          SubTitle: "Obtain your API Key from Google AI",
-          Placeholder: "Enter your Google AI Studio API Key",
-        },
-
-        Endpoint: {
-          Title: "Endpoint Address",
-          SubTitle: "Example:",
-        },
-
-        ApiVersion: {
-          Title: "API Version (specific to gemini-pro)",
-          SubTitle: "Select a specific API version",
-        },
-      },
       Anthropic: {
         ApiKey: {
           Title: "Anthropic API Key",
@@ -506,6 +485,24 @@ const en: LocaleType = {
           Title: "API Version (claude api version)",
           SubTitle: "Select and input a specific API version",
         },
+      },
+      Google: {
+        ApiKey: {
+          Title: "API Key",
+          SubTitle: "Obtain your API Key from Google AI",
+          Placeholder: "Enter your Google AI Studio API Key",
+        },
+
+        Endpoint: {
+          Title: "Endpoint Address",
+          SubTitle: "Example:",
+        },
+
+        ApiVersion: {
+          Title: "API Version (specific to gemini-pro)",
+          SubTitle: "Select a specific API version",
+        },
+      },
     },
 
     Model: "Model",
@@ -706,6 +703,6 @@ Latex block: $$e=mc^2$$`,
     Code: "Detected access code from url, confirm to apply? ",
     Settings: "Detected settings from url, confirm to apply?",
   },
-},
+};
 
 export default en;

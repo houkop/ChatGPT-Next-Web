@@ -352,10 +352,6 @@ const cn = {
       ImportChatSuccess: "聊天数据导入成功。",
       ImportPromptsSuccess: "成功导入 Prompts 数据。",
     },
-    AutoScrollMessage: {
-      Title: "自动滚动回复",
-      SubTitle: "滚动消息以进行回复", 
-    },
     Mask: {
       Splash: {
         Title: "面具启动页",
@@ -391,6 +387,11 @@ const cn = {
     CompressThreshold: {
       Title: "历史消息长度压缩阈值",
       SubTitle: "当未压缩的历史消息超过该值时，将进行压缩",
+    },
+    Token: {
+      Title: "API Key",
+      SubTitle: "使用自己的 Key 可绕过密码访问限制",
+      Placeholder: "OpenAI API Key",
     },
 
     Usage: {
@@ -456,6 +457,23 @@ const cn = {
         ApiVerion: {
           Title: "接口版本 (azure api version)",
           SubTitle: "选择指定的部分版本",
+        },
+      },
+      Anthropic: {
+        ApiKey: {
+          Title: "接口密钥",
+          SubTitle: "使用自定义 Anthropic Key 绕过密码访问限制",
+          Placeholder: "Anthropic API Key",
+        },
+
+        Endpoint: {
+          Title: "接口地址",
+          SubTitle: "样例：",
+        },
+
+        ApiVerion: {
+          Title: "接口版本 (claude api version)",
+          SubTitle: "选择一个特定的 API 版本输入",
         },
       },
       Google: {
