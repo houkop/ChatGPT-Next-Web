@@ -89,6 +89,9 @@ function getSummarizeModel(currentModel: string) {
   if (currentModel.startsWith("gpt")) {
     return SUMMARIZE_MODEL;
   }
+  if (currentModel.startsWith("dalle")) {
+    return SUMMARIZE_MODEL;
+  }
   if (currentModel.startsWith("gemini-pro")) {
     return GEMINI_SUMMARIZE_MODEL;
   }
@@ -567,7 +570,7 @@ export const useChatStore = createPersistStore(
           );
       
           const sessionModelConfig = this.currentSession().mask.modelConfig;
-          const topicModel = getSummarizeModel(session.mask.modelConfig.model, sessionModelConfig);
+          const topicModel = getSummarizeModel(session.mask.modelConfig.model);
       
           if (topicModel.startsWith("dall-e")) {
             api.llm.chat({
@@ -656,7 +659,7 @@ export const useChatStore = createPersistStore(
           modelConfig.sendMemory
         ) {
           const sessionModelConfig = this.currentSession().mask.modelConfig;
-          const summarizeModel = getSummarizeModel(session.mask.modelConfig.model, sessionModelConfig);
+          const summarizeModel = getSummarizeModel(session.mask.modelConfig.model);
           const { max_tokens, ...modelcfg } = modelConfig;
 
           if (summarizeModel.startsWith("dall-e")) {
