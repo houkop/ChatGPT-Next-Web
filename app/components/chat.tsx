@@ -489,7 +489,7 @@ function useScrollToBottom() {
 
   // auto scroll
   useEffect(() => {
-    if (autoScroll && !detach) {
+    if (autoScroll) {
       scrollDomToBottom();
     }
     const dom = scrollRef.current;
