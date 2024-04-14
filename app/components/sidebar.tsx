@@ -186,38 +186,6 @@ export function SideBar(props: { className?: string }) {
           }}
           shadow
         />
-        <IconButton
-          icon={<PluginIcon />}
-          text={shouldNarrow ? undefined : Locale.Plugin.Name}
-          className={styles["sidebar-bar-button"]}
-          onClick={() => showToast(Locale.WIP)}
-          shadow
-        />
-        <IconButton
-          icon={<PrivacyIcon />}
-          text={shouldNarrow ? undefined : Locale.PrivacyPage.Name}
-          className={styles["sidebar-bar-button"]}
-          onClick={() =>
-            navigate(Path.PrivacyPage, { state: { fromHome: true } })
-          }
-          shadow
-        />
-      </div>
-      <div className={styles["sidebar-header-bar"]}>
-        <IconButton
-          icon={<PinnedIcon />}
-          text={shouldNarrow ? undefined : Locale.Changelog.Name}
-          className={styles["sidebar-bar-button"]}
-          onClick={() => navigate(Path.ChangeLog, { state: { fromHome: true } })}
-          shadow
-        />
-        <IconButton
-          icon={<TodoIcon />}
-          text={shouldNarrow ? undefined : Locale.TODOList.Name}
-          className={styles["sidebar-bar-button"]}
-          onClick={() => showToast(Locale.WIP)}
-          shadow
-        />
       </div>
 
       <div className={styles["chat-list-search"]}>
