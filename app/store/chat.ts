@@ -84,18 +84,14 @@ function createEmptySession(): ChatSession {
   };
 }
 
-function getSummarizeModel(currentModel: string) {
-  // if it is using gpt-* models, force to use 3.5 to summarize
-  if (currentModel.startsWith("gpt")) {
-    return SUMMARIZE_MODEL;
-  }
+function getSummarizeModel(currentModel: string, modelConfig: ModelConfig) {
   if (currentModel.startsWith("dalle")) {
     return SUMMARIZE_MODEL;
   }
   if (currentModel.startsWith("gemini-pro")) {
     return GEMINI_SUMMARIZE_MODEL;
   }
-  return currentModel;
+  return modelConfig.model;
 }
 
 function countMessages(msgs: ChatMessage[]) {
@@ -570,7 +566,7 @@ export const useChatStore = createPersistStore(
           );
       
           const sessionModelConfig = this.currentSession().mask.modelConfig;
-          const topicModel = getSummarizeModel(session.mask.modelConfig.model);
+          const topicModel = getSummarizeModel(session.mask.modelConfig.model, sessionModelConfig);
       
           if (topicModel.startsWith("dall-e")) {
             api.llm.chat({
@@ -659,7 +655,7 @@ export const useChatStore = createPersistStore(
           modelConfig.sendMemory
         ) {
           const sessionModelConfig = this.currentSession().mask.modelConfig;
-          const summarizeModel = getSummarizeModel(session.mask.modelConfig.model);
+          const summarizeModel = getSummarizeModel(session.mask.modelConfig.model, sessionModelConfig);
           const { max_tokens, ...modelcfg } = modelConfig;
 
           if (summarizeModel.startsWith("dall-e")) {
