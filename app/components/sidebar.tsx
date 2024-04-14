@@ -167,7 +167,7 @@ export function SideBar(props: { className?: string }) {
         </div>
         <div className={`${styles["sidebar-logo"]} + no-dark`}>
           <div className={`${styles["animated-logo"]} + no-dark`}>
-            <ChatGptIcon className={`${styles["rotate"]} + no-dark`} />
+            <ChatGptIcon className={`no-dark`} />
           </div>
         </div>
       </div>
