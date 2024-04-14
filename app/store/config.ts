@@ -66,7 +66,7 @@ export const DEFAULT_CONFIG = {
      * The quality of the image that will be generated. 
      * `hd` creates images with finer details and greater consistency across the image.
      **/
-    quality: "hd", // Only DALL·E-3 for DALL·E-2 not not really needed
+    quality: "standard", // Only DALL·E-3 for DALL·E-2 not not really needed
     /** SIZE ALL·E Models
      * Author: @H0llyW00dzZ
      * DALL·E-2 : Must be one of `256x256`, `512x512`, or `1024x1024`.
@@ -94,7 +94,7 @@ export const DEFAULT_CONFIG = {
    * Text Moderation Open AI
    * Author: @H0llyW00dzZ
    **/
-  textmoderation: true, // text moderation default is enabled
+  textmoderation: false, // text moderation default is enabled
 
   desktopShortcut: "",
   speed_animation: 60, // Lower values will result in faster animation
@@ -246,14 +246,14 @@ export const useAppConfig = createPersistStore(
       }
 
       if (version < 3.9) {
-        state.textmoderation = true;
+        state.textmoderation = false;
       }
 
       if (version < 4.1) {
         state.modelConfig = {
           ...state.modelConfig,
           n: 1,
-          quality: "hd",
+          quality: "standard",
           size: "1024x1024",
           style: "vivid",
         };
