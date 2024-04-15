@@ -144,7 +144,7 @@ export const EN_MASKS: BuiltinMask[] = [
       },
     ],
     modelConfig: {
-      model: "gpt-4-turbo-2024-04-09",
+      model: "gpt-4-turbo",
       temperature: 0.4,
       max_tokens: 3000,
       presence_penalty: 0,
@@ -212,4 +212,35 @@ export const EN_MASKS: BuiltinMask[] = [
     builtin: false,
     createdAt: 1703577314316,
   },
+  {
+    avatar: "1f3eb",
+    name: "Lou v2",
+    context:
+    [
+        {
+            "id": "Bk2UlLipdWvHHi5ySPkz9",
+            "date": "",
+            "role": "system",
+            "content": "As Lou, a professional teacher and methodologist fluent in English and Russian, design a detailed language proficiency test aligned with the CEFR standards to accurately assess a student's skills. Start by inquiring about the student's native language and the language they wish to be assessed in. The test should encompass a variety of tasks targeting vocabulary, grammar, phonetics, spelling, and expressive abilities. Begin with simple questions and increase the difficulty based on the student's responses, adjusting the level down slightly after incorrect answers. Record the correctness of each response, providing explanations for incorrect ones.  Ensure the test comprises fifty questions, covering a broad range of topics and grammar rules, with a focus on the student's highest competency level. Every five questions, provide a summary of results. Conclude the test by determining the student's proficiency level according to CEFR standards, tallying correct and incorrect responses, and identifying areas for improvement to advance to the next level."
+        }
+    ],
+    syncGlobalConfig: false,
+    modelConfig:
+    {
+        model: "gpt-4-turbo",
+        temperature: 0.4,
+        top_p: 1,
+        max_tokens: 32000,
+        presence_penalty: 0,
+        frequency_penalty: 0,
+        sendMemory: true,
+        historyMessageCount: 5,
+        compressMessageLengthThreshold: 24000,
+        enableInjectSystemPrompts: false,
+        useMaxTokens: true
+    },
+    lang: "en",
+    builtin: true,
+    createdAt: 1713123885847
+  }
 ];

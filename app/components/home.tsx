@@ -199,7 +199,7 @@ export function Home() {
   }, []);
 
   if (!useHasHydrated()) {
-    return <Loading noLogo/>;
+    return <Loading/>;
   }
 
   return (
