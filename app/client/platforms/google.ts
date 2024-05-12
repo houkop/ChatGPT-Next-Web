@@ -116,7 +116,6 @@ export class GeminiProApi implements LLMApi {
     const provider = getProviderFromState();
     const cfgspeed_animation = useAppConfig.getState().speed_animation; // Get the animation speed from the app config
     // const apiClient = this;
-    const visionModel = isVisionModel(options.config.model);
     let multimodal = false;
 
     // Construct messages with the correct types
@@ -219,17 +218,12 @@ export class GeminiProApi implements LLMApi {
     const controller = new AbortController();
     options.onController?.(controller);
     try {
-      let googleChatPath = visionModel
-        ? Google.VisionChatPath(modelConfig.model)
-        : Google.ChatPath(modelConfig.model);
-      let chatPath = this.path(googleChatPath);
-
       // let baseUrl = accessStore.googleUrl;
 
       if (!baseUrl) {
         baseUrl = isApp
-          ? DEFAULT_API_HOST + "/api/proxy/google/" + googleChatPath
-          : chatPath;
+          ? DEFAULT_API_HOST + "/api/proxy/google/" + Google.ChatPath(modelConfig.model)
+          : this.path(Google.ChatPath(modelConfig.model));
       }
 
       if (isApp) {
@@ -247,6 +241,7 @@ export class GeminiProApi implements LLMApi {
         () => controller.abort(),
         REQUEST_TIMEOUT_MS,
       );
+      
       if (shouldStream) {
         let responseText = "";
         let remainText = "";

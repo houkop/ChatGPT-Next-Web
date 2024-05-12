@@ -114,7 +114,6 @@ export const Azure = {
 export const Google = {
   ExampleEndpoint: "https://generativelanguage.googleapis.com/",
   ChatPath: (modelName: string) => `v1beta/models/${modelName}:generateContent`,
-  VisionChatPath: (modelName: string) => `v1beta/models/${modelName}:generateContent`,
 };
 
 export const DEFAULT_INPUT_TEMPLATE = `{{input}}`; // input / time / model / lang
@@ -139,8 +138,6 @@ export const KnowledgeCutOffDate: Record<string, string> = {
   "gpt-4-turbo": "2023-12",
   "gpt-4-turbo-2024-04-09": "2023-12",
   "gpt-4-turbo-preview": "2023-12",
-  "gpt-4-1106-preview": "2023-04",
-  "gpt-4-0125-preview": "2023-12",
   "gpt-4-vision-preview": "2023-04",
   // After improvements,
   // it's now easier to add "KnowledgeCutOffDate" instead of stupid hardcoding it, as was done previously.
@@ -150,7 +147,6 @@ export const KnowledgeCutOffDate: Record<string, string> = {
 
 const openaiModels = [
   "gpt-3.5-turbo",
-  "gpt-3.5-turbo-16k",
   "gpt-4-turbo",
   "gpt-4-turbo-preview",
   "gpt-4-vision-preview",
@@ -208,7 +204,7 @@ export const CHAT_PAGE_SIZE = 15;
 export const MAX_RENDER_MSG_COUNT = 45;
 
 // some famous webdav endpoints
-export const internalWhiteWebDavEndpoints = [
+export const internalAllowedWebDavEndpoints = [
   "https://dav.jianguoyun.com/dav/",
   "https://dav.dropdav.com/",
   "https://dav.box.com/dav",

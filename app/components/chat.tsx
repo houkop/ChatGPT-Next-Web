@@ -545,10 +545,20 @@ export function ChatActions(props: {
   // switch model
   const currentModel = chatStore.currentSession().mask.modelConfig.model;
   const allModels = useAllModels();
-  const models = useMemo(
-    () => allModels.filter((m) => m.available),
-    [allModels],
-  );
+  const models = useMemo(() => {
+    const filteredModels = allModels.filter((m) => m.available);
+    const defaultModel = filteredModels.find((m) => m.isDefault);
+
+    if (defaultModel) {
+      const arr = [
+        defaultModel,
+        ...filteredModels.filter((m) => m !== defaultModel),
+      ];
+      return arr;
+    } else {
+      return filteredModels;
+    }
+  }, [allModels]);
   const [showModelSelector, setShowModelSelector] = useState(false);
   const [showUploadImage, setShowUploadImage] = useState(false);
 
@@ -1317,20 +1327,21 @@ function _Chat() {
 
         console.log("[Command] got settings from url: ", payload);
 
-        showConfirm(
-          Locale.URLCommand.Settings +
-          `\n${JSON.stringify(payload, null, 4)}`,
-        ).then((res) => {
-          if (!res) return;
-          accessStore.update((access) => {
-            // Only update openaiApiKey if payload.key is a string
-            if (typeof payload.key === 'string') {
-              access.openaiApiKey = payload.key;
+        if (payload.key || payload.url) {
+          showConfirm(
+            Locale.URLCommand.Settings +
+              `\n${JSON.stringify(payload, null, 4)}`,
+          ).then((res) => {
+            if (!res) return;
+            if (payload.key) {
+              accessStore.update(
+                (access) => (access.openaiApiKey = payload.key!),
+              );
             }
-            // Only update openaiUrl if payload.url is a string
-            if (typeof payload.url === 'string') {
-              access.openaiUrl = payload.url;
+            if (payload.url) {
+              accessStore.update((access) => (access.openaiUrl = payload.url!));
             }
+            accessStore.update((access) => (access.useCustomConfig = true));
           });
         });
       } catch {

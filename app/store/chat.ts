@@ -21,6 +21,8 @@ import { estimateTokenLength } from "../utils/token";
 import { nanoid } from "nanoid";
 import { createPersistStore } from "../utils/store";
 import { identifyDefaultClaudeModel } from "../utils/checkers";
+import { collectModelsWithDefaultModel } from "../utils/model";
+import { useAccessStore } from "./access";
 
 export type ChatMessage = RequestMessage & {
   date: string;
@@ -88,7 +90,7 @@ function getSummarizeModel(currentModel: string, modelConfig: ModelConfig) {
   if (currentModel.startsWith("dalle")) {
     return SUMMARIZE_MODEL;
   }
-  if (currentModel.startsWith("gemini-pro")) {
+  if (currentModel.startsWith("gemini")) {
     return GEMINI_SUMMARIZE_MODEL;
   }
   return modelConfig.model;
