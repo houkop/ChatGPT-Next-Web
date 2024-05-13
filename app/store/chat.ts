@@ -669,7 +669,7 @@ export const useChatStore = createPersistStore(
                   date: "",
                 }),
               ),
-              config: { ...modelcfg, model: "gpt-4-turbo", stream: true },
+              config: { ...modelcfg, model: "gpt-4o", stream: true },
               onUpdate(message) {
                 session.memoryPrompt = message;
                 if (!isToastShown) {
