@@ -151,6 +151,8 @@ const openaiModels = [
   "gpt-4o",
   "gpt-4-turbo",
   "gpt-4-turbo-preview",
+  "gpt-4o",
+  "gpt-4o-2024-05-13",
   "gpt-4-vision-preview",
   "ft:gpt-3.5-turbo-0125:personal:fix-mistakes:9BTsglDw",
   "dall-e-2",
@@ -160,6 +162,7 @@ const openaiModels = [
 const googleModels = [
   "gemini-1.0-pro",
   "gemini-1.5-pro-latest",
+  "gemini-1.5-flash-latest",
   "gemini-pro-vision",
 ];
 
