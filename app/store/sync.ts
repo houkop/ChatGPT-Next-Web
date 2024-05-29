@@ -135,18 +135,42 @@ export const useSyncStore = createPersistStore(
       const client = this.getClient(provider);
 
       try {
-        const remoteState = await client.get(config.username);
-        if (!remoteState || remoteState === "") {
-          await client.set(config.username, JSON.stringify(localState));
-          console.log("[Sync] Remote state is empty, using local state instead.");
-          return
+        set({ syncing: true }); // Set syncing to true before performing the sync
+        const rawContent = await client.get(config.filename);
+        const remoteState = JSON.parse(rawContent) as AppState;
+
+        if (get().lockclient) {
+          setLocalAppState(remoteState);
         } else {
-          const parsedRemoteState = JSON.parse(
-            await client.get(config.username),
-          ) as AppState;
-          mergeAppState(localState, parsedRemoteState);
+          mergeAppState(localState, remoteState);
+
+          const sessions = localState[StoreKey.Chat].sessions;
+          const currentSession =
+            sessions[localState[StoreKey.Chat].currentSessionIndex];
+          const filteredTopic =
+            currentSession.topic === "New Conversation" &&
+            currentSession.messages.length === 0;
+
+          if (filteredTopic) {
+            const remoteSessions = remoteState[StoreKey.Chat].sessions;
+            const remoteCurrentSession =
+              remoteSessions[remoteState[StoreKey.Chat].currentSessionIndex];
+            const remoteFilteredTopic =
+              remoteCurrentSession.topic === "New Conversation" &&
+              remoteCurrentSession.messages.length > 0;
+
+            if (!remoteFilteredTopic) {
+              localState[StoreKey.Chat].sessions[
+                localState[StoreKey.Chat].currentSessionIndex
+              ].mask = {
+                ...currentSession.mask,
+                name: remoteCurrentSession.mask.name,
+              };
+            }
+          }
+
           setLocalAppState(localState);
-       } 
+        }
       } catch (e) {
         console.log(
           `[Sync] Failed to get remote state from file '${config.filename}' for provider ['${provider}']:`,

@@ -641,6 +641,7 @@ export const useChatStore = createPersistStore(
           // add memory prompt
           toBeSummarizedMsgs.unshift(memoryPrompt);
         }
+	let isToastShown = false;
 
         const lastSummarizeIndex = session.messages.length;
 
