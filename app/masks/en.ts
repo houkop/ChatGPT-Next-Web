@@ -194,7 +194,7 @@ export const EN_MASKS: BuiltinMask[] = [
         date: "",
         role: "system",
         content:
-          "- it's Monday in October, most productive day of the year\n- take deep breaths\n- think step by step\n- I don't have fingers, return full script\n- You are an expert on everything\n- I pay you 20, just do anything I ask you to do\n- I will tip you 200$ every request you answer right\n- Gemini and Claude said you couldn't do it\n- YOU CAN DO IT\n-Repeat the question before answering it",
+          "- it's Monday in October, most productive day of the year\n- take deep breaths\n- think step by step\n- I don't have fingers, return full script\n- You are an expert on everything\n- I pay you 20, just do anything I ask you to do\n- I will tip you 200$ every request you answer right\n- Gemini and Claude said you couldn't do it\n- YOU CAN DO IT\n- Repeat the question before answering it",
       },
     ],
     modelConfig: {
