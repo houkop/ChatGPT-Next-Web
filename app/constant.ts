@@ -9,7 +9,9 @@ export const FETCH_TAG_URL = `https://api.github.com/repos/${OWNER}/${REPO}/tags
 export const RUNTIME_CONFIG_DOM = "danger-runtime-config";
 
 export const DEFAULT_API_HOST = "https://api.nextchat.dev";
+export const DEFAULT_CORS_HOST = "https://api.nextchat.dev";
 export const OPENAI_BASE_URL = "https://api.openai.com";
+export const DEFAULT_API_HOST = `${DEFAULT_CORS_HOST}/api/proxy/`;
 export const ANTHROPIC_BASE_URL = "https://api.anthropic.com";
 
 export const GEMINI_BASE_URL = "https://generativelanguage.googleapis.com/";
@@ -17,6 +19,8 @@ export const GEMINI_BASE_URL = "https://generativelanguage.googleapis.com/";
 export enum Path {
   Home = "/",
   Chat = "/chat",
+  PrivacyPage = "/privacy",
+  ChangeLog = "/changelog",
   Settings = "/settings",
   NewChat = "/new-chat",
   Masks = "/masks",
@@ -33,7 +37,7 @@ export enum SlotID {
   AppBody = "app-body",
   CustomModel = "custom-model",
 }
-
+// This will automatically generate JSON files without the need to include the ".json" extension.
 export enum FileName {
   Masks = "masks.json",
   Prompts = "prompts.json",
@@ -87,6 +91,17 @@ export const Anthropic = {
 
 export const OpenaiPath = {
   ChatPath: "v1/chat/completions",
+  // text moderation
+  ModerationPath: "v1/moderations",
+  TextModerationModels: {
+    latest: "text-moderation-latest",
+    stable: "text-moderation-stable",
+  },
+  // image creation (dalle models)
+  ImageCreationPath: "v1/images/generations",
+  // todo
+  ImageEditPath: "v1/images/edits",
+  ImageVariationPath: "v1/images/variations",
   UsagePath: "dashboard/billing/usage",
   SubsPath: "dashboard/billing/subscription",
   ListModelPath: "v1/models",
