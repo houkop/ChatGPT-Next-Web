@@ -44,12 +44,3 @@ dev
 
 *.key
 *.key.pub
-
-# H0llyW00dzZ devs builder
-builder.sh
-
-# Respect Privacy
-testACatPicture.jpg
-testACuteGirlPicture.png
-# This my Pet
-testARareEaglePicture.png

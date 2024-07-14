@@ -97,7 +97,17 @@ function setItem(key: string, value: string) {
 
 function getLanguages() {
   try {
-    return navigator.languages;
+    const locale = new Intl.Locale(navigator.language).maximize();
+    const region = locale?.region?.toLowerCase();
+    // 1. check region code in ALL_LANGS
+    if (AllLangs.includes(region as Lang)) {
+      return region as Lang;
+    }
+    // 2. check language code in ALL_LANGS
+    if (AllLangs.includes(locale.language as Lang)) {
+      return locale.language as Lang;
+    }
+    return DEFAULT_LANG;
   } catch {
     return DEFAULT_LANG;
   }
