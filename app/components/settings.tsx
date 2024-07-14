@@ -306,8 +306,10 @@ function CheckButton() {
           <LoadingIcon />
         ) : checkState === "success" ? (
           <CloudSuccessIcon />
-        ) : (
+        ) : checkState === "failed" ? (
           <CloudFailIcon />
+        ) : (
+          <ConnectionIcon />
         )
       }
     ></IconButton>
@@ -419,9 +421,7 @@ function SyncConfigModal(props: { onClose?: () => void }) {
         {syncStore.provider === ProviderType.WebDAV && (
           <>
             <List>
-              <ListItem
-                title={Locale.Settings.Sync.Config.WebDav.Endpoint.Name}
-              >
+              <ListItem title={Locale.Settings.Sync.Config.WebDav.Endpoint}>
                 <input
                   type="text"
                   value={syncStore.webdav.endpoint}
@@ -434,9 +434,7 @@ function SyncConfigModal(props: { onClose?: () => void }) {
                 ></input>
               </ListItem>
 
-              <ListItem
-                title={Locale.Settings.Sync.Config.WebDav.UserName.Name}
-              >
+              <ListItem title={Locale.Settings.Sync.Config.WebDav.UserName}>
                 <input
                   type="text"
                   value={syncStore.webdav.username}
@@ -448,9 +446,7 @@ function SyncConfigModal(props: { onClose?: () => void }) {
                   }}
                 ></input>
               </ListItem>
-              <ListItem
-                title={Locale.Settings.Sync.Config.WebDav.Password.Name}
-              >
+              <ListItem title={Locale.Settings.Sync.Config.WebDav.Password}>
                 <PasswordInput
                   value={syncStore.webdav.password}
                   onChange={(e) => {
@@ -920,7 +916,7 @@ function SyncItems() {
   const promptStore = usePromptStore();
   const maskStore = useMaskStore();
   const couldSync = useMemo(() => {
-    return syncStore.countSync();
+    return syncStore.cloudSync();
   }, [syncStore]);
 
   const [showSyncConfigModal, setShowSyncConfigModal] = useState(false);
@@ -1480,7 +1476,7 @@ export function Settings() {
                     </Select>
                   </ListItem>
 
-                  {accessStore.provider === "OpenAI" || accessStore.provider === "Custom" ? (
+                  {accessStore.provider === ServiceProvider.OpenAI && (
                     <>
                       <ListItem
                         title={Locale.Settings.Access.OpenAI.Endpoint.Title}
@@ -1519,7 +1515,8 @@ export function Settings() {
                         />
                       </ListItem>
                     </>
-                  ) : accessStore.provider === "Azure" ? (
+                  )}
+                  {accessStore.provider === ServiceProvider.Azure && (
                     <>
                       <ListItem
                         title={Locale.Settings.Access.Azure.Endpoint.Title}
@@ -1578,7 +1575,8 @@ export function Settings() {
                         ></input>
                       </ListItem>
                     </>
-                  ) : accessStore.provider === "Google" ? (
+                  )}
+                  {accessStore.provider === ServiceProvider.Google && (
                     <>
                       <ListItem
                         title={Locale.Settings.Access.Google.Endpoint.Title}
