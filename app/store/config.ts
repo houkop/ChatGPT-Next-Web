@@ -7,6 +7,7 @@ import {
   DEFAULT_SIDEBAR_WIDTH,
   DEFAULT_SYSTEM_TEMPLATE,
   StoreKey,
+  ServiceProvider,
 } from "../constant";
 import Locale from ".././locales";
 import { createPersistStore } from "../utils/store";
@@ -51,8 +52,9 @@ export const DEFAULT_CONFIG = {
   models: DEFAULT_MODELS as any as LLMModel[],
 
   modelConfig: {
-    model: "gpt-4o" as ModelType,
-    temperature: 0.4,
+    model: "gpt-3.5-turbo" as ModelType,
+    providerName: "OpenAI" as ServiceProvider,
+    temperature: 0.5,
     top_p: 1,
     max_tokens: 8000,
     presence_penalty: 0,
@@ -199,12 +201,12 @@ export const useAppConfig = createPersistStore(
 
       for (const model of oldModels) {
         model.available = false;
-        modelMap[model.name] = model;
+        modelMap[`${model.name}@${model?.provider?.id}`] = model;
       }
 
       for (const model of newModels) {
         model.available = true;
-        modelMap[model.name] = model;
+        modelMap[`${model.name}@${model?.provider?.id}`] = model;
       }
 
       set(() => ({

@@ -1,3 +1,4 @@
+import { ServiceProvider } from "@/app/constant";
 import { ModalConfigValidator, ModelConfig } from "../store";
 
 import Locale from "../locales";
@@ -24,25 +25,25 @@ export function ModelConfigList(props: {
     { value: DEFAULT_SYSTEM_TEMPLATE, label: Locale.Label_System_Template.Default },
     { value: Locale.System_Template, label: Locale.Label_System_Template.Local },
   ];
+  const value = `${props.modelConfig.model}@${props.modelConfig?.providerName}`;
 
   return (
     <>
       <ListItem title={Locale.Settings.Model}>
         <Select
-          value={props.modelConfig.model}
+          value={value}
           onChange={(e) => {
-            props.updateConfig(
-              (config) =>
-              (config.model = ModalConfigValidator.model(
-                e.currentTarget.value,
-              )),
-            );
+            const [model, providerName] = e.currentTarget.value.split("@");
+            props.updateConfig((config) => {
+              config.model = ModalConfigValidator.model(model);
+              config.providerName = providerName as ServiceProvider;
+            });
           }}
         >
           {allModels
             .filter((v) => v.available)
             .map((v, i) => (
-              <option value={v.name} key={i}>
+              <option value={`${v.name}@${v.provider?.providerName}`} key={i}>
                 {v.displayName}({v.provider?.providerName})
               </option>
             ))}

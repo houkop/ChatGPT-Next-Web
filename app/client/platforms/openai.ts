@@ -1,13 +1,17 @@
 "use client";
+// azure and openai, using same models. so using same LLMApi.
 import {
   ApiPath,
   DEFAULT_API_HOST,
   DEFAULT_MODELS,
   OpenaiPath,
+  Azure,
   REQUEST_TIMEOUT_MS,
   ServiceProvider,
 } from "@/app/constant";
 import { useAccessStore, useAppConfig, useChatStore } from "@/app/store";
+import { collectModelsWithDefaultModel } from "@/app/utils/model";
+import { cloudflareAIGatewayUrl } from "@/app/utils/cloudflare";
 
 import {
   ChatOptions,
@@ -46,7 +50,7 @@ export interface OpenAIListModelResponse {
   }>;
 }
 
-interface RequestPayload {
+export interface RequestPayload {
   messages: {
     role: "system" | "user" | "assistant";
     content: string | MultimodalContent[];
@@ -68,17 +72,12 @@ export class ChatGPTApi implements LLMApi {
 
     let baseUrl = "";
 
+    const isAzure = path.includes("deployments");
     if (accessStore.useCustomConfig) {
-      const isAzure = accessStore.provider === ServiceProvider.Azure;
-
       if (isAzure && !accessStore.isValidAzure()) {
         throw Error(
           "incomplete azure config, please check it in your settings page",
         );
-      }
-
-      if (isAzure) {
-        path = makeAzurePath(path, accessStore.azureApiVersion);
       }
 
       baseUrl = isAzure ? accessStore.azureUrl : accessStore.openaiUrl;
@@ -86,21 +85,25 @@ export class ChatGPTApi implements LLMApi {
 
     if (baseUrl.length === 0) {
       const isApp = !!getClientConfig()?.isApp;
-      baseUrl = isApp
-        ? DEFAULT_API_HOST + "/proxy" + ApiPath.OpenAI
-        : ApiPath.OpenAI;
+      const apiPath = isAzure ? ApiPath.Azure : ApiPath.OpenAI;
+      baseUrl = isApp ? DEFAULT_API_HOST + "/proxy" + apiPath : apiPath;
     }
 
     if (baseUrl.endsWith("/")) {
       baseUrl = baseUrl.slice(0, baseUrl.length - 1);
     }
-    if (!baseUrl.startsWith("http") && !baseUrl.startsWith(ApiPath.OpenAI)) {
+    if (
+      !baseUrl.startsWith("http") &&
+      !isAzure &&
+      !baseUrl.startsWith(ApiPath.OpenAI)
+    ) {
       baseUrl = "https://" + baseUrl;
     }
 
     console.log("[Proxy Endpoint] ", baseUrl, path);
 
-    return [baseUrl, path].join("/");
+    // try rebuild url, when using cloudflare ai gateway in client
+    return cloudflareAIGatewayUrl([baseUrl, path].join("/"));
   }
 
   extractMessage(res: any) {
@@ -188,6 +191,7 @@ export class ChatGPTApi implements LLMApi {
       ...useChatStore.getState().currentSession().mask.modelConfig,
       ...{
         model: options.config.model,
+        providerName: options.config.providerName,
       },
     };
 
@@ -277,6 +281,35 @@ export class ChatGPTApi implements LLMApi {
     options.onController?.(controller);
 
     try {
+      let chatPath = "";
+      if (modelConfig.providerName === ServiceProvider.Azure) {
+        // find model, and get displayName as deployName
+        const { models: configModels, customModels: configCustomModels } =
+          useAppConfig.getState();
+        const {
+          defaultModel,
+          customModels: accessCustomModels,
+          useCustomConfig,
+        } = useAccessStore.getState();
+        const models = collectModelsWithDefaultModel(
+          configModels,
+          [configCustomModels, accessCustomModels].join(","),
+          defaultModel,
+        );
+        const model = models.find(
+          (model) =>
+            model.name === modelConfig.model &&
+            model?.provider?.providerName === ServiceProvider.Azure,
+        );
+        chatPath = this.path(
+          Azure.ChatPath(
+            (model?.displayName ?? model?.name) as string,
+            useCustomConfig ? useAccessStore.getState().azureApiVersion : "",
+          ),
+        );
+      } else {
+        chatPath = this.path(OpenaiPath.ChatPath);
+      }
       /**
        * Represents the dallemodels variable.
        * @author H0llyW00dzZ
