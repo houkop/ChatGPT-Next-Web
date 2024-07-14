@@ -281,35 +281,6 @@ export class ChatGPTApi implements LLMApi {
     options.onController?.(controller);
 
     try {
-      let chatPath = "";
-      if (modelConfig.providerName === ServiceProvider.Azure) {
-        // find model, and get displayName as deployName
-        const { models: configModels, customModels: configCustomModels } =
-          useAppConfig.getState();
-        const {
-          defaultModel,
-          customModels: accessCustomModels,
-          useCustomConfig,
-        } = useAccessStore.getState();
-        const models = collectModelsWithDefaultModel(
-          configModels,
-          [configCustomModels, accessCustomModels].join(","),
-          defaultModel,
-        );
-        const model = models.find(
-          (model) =>
-            model.name === modelConfig.model &&
-            model?.provider?.providerName === ServiceProvider.Azure,
-        );
-        chatPath = this.path(
-          Azure.ChatPath(
-            (model?.displayName ?? model?.name) as string,
-            useCustomConfig ? useAccessStore.getState().azureApiVersion : "",
-          ),
-        );
-      } else {
-        chatPath = this.path(OpenaiPath.ChatPath);
-      }
       /**
        * Represents the dallemodels variable.
        * @author H0llyW00dzZ
@@ -341,6 +312,35 @@ export class ChatGPTApi implements LLMApi {
          */
         requestPayload = requestPayloads.chat;
       }
+      if (modelConfig.providerName === ServiceProvider.Azure) {
+        // find model, and get displayName as deployName
+        const { models: configModels, customModels: configCustomModels } =
+          useAppConfig.getState();
+        const {
+          defaultModel,
+          customModels: accessCustomModels,
+          useCustomConfig,
+        } = useAccessStore.getState();
+        const models = collectModelsWithDefaultModel(
+          configModels,
+          [configCustomModels, accessCustomModels].join(","),
+          defaultModel,
+        );
+        const model = models.find(
+          (model) =>
+            model.name === modelConfig.model &&
+            model?.provider?.providerName === ServiceProvider.Azure,
+        );
+        chatPath = this.path(
+          Azure.ChatPath(
+            (model?.displayName ?? model?.name) as string,
+            useCustomConfig ? useAccessStore.getState().azureApiVersion : "",
+          ),
+        );
+      } else {
+        chatPath = this.path(OpenaiPath.ChatPath);
+      }
+
 
       const chatPayload = {
         method: "POST",
