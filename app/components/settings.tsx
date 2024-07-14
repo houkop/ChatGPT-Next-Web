@@ -916,7 +916,7 @@ function SyncItems() {
   const promptStore = usePromptStore();
   const maskStore = useMaskStore();
   const couldSync = useMemo(() => {
-    return syncStore.cloudSync();
+    return syncStore.countSync();
   }, [syncStore]);
 
   const [showSyncConfigModal, setShowSyncConfigModal] = useState(false);
