@@ -421,7 +421,7 @@ function SyncConfigModal(props: { onClose?: () => void }) {
         {syncStore.provider === ProviderType.WebDAV && (
           <>
             <List>
-              <ListItem title={Locale.Settings.Sync.Config.WebDav.Endpoint}>
+              <ListItem title={Locale.Settings.Sync.Config.WebDav.Endpoint.Name}>
                 <input
                   type="text"
                   value={syncStore.webdav.endpoint}
@@ -434,7 +434,7 @@ function SyncConfigModal(props: { onClose?: () => void }) {
                 ></input>
               </ListItem>
 
-              <ListItem title={Locale.Settings.Sync.Config.WebDav.UserName}>
+              <ListItem title={Locale.Settings.Sync.Config.WebDav.UserName.Name}>
                 <input
                   type="text"
                   value={syncStore.webdav.username}
@@ -446,7 +446,7 @@ function SyncConfigModal(props: { onClose?: () => void }) {
                   }}
                 ></input>
               </ListItem>
-              <ListItem title={Locale.Settings.Sync.Config.WebDav.Password}>
+              <ListItem title={Locale.Settings.Sync.Config.WebDav.Password.Name}>
                 <PasswordInput
                   value={syncStore.webdav.password}
                   onChange={(e) => {
