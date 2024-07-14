@@ -26,7 +26,6 @@ import {
   EventStreamContentType,
   fetchEventSource,
 } from "@fortaine/fetch-event-source";
-import { moderateText } from './textmoderation';
 import { 
   getNewStuff,
   getModelForInstructVersion,
@@ -34,7 +33,6 @@ import {
 import { prettyObject } from "@/app/utils/format";
 import { getClientConfig } from "@/app/config/client";
 import { getProviderFromState } from "@/app/utils";
-import { makeAzurePath } from "@/app/azure";
 import {
   getMessageTextContent,
   getMessageImages,
@@ -110,77 +108,8 @@ export class ChatGPTApi implements LLMApi {
     return res.choices?.at(0)?.message?.content ?? "";
   }
 
-  /**
-   * Initiates a chat with the specified options.
-   * 
-   * @param options - The chat (LLM's method by Yidadaa) options.
-   * @returns A Promise that resolves to the chat and images response.
-   * 
-   * @remarks
-   * This method sends chat and images messages to the OpenAI API & Azure and handles text moderation if enabled.
-   * 
-   */
   async chat(options: ChatOptions) {
     const visionModel = isVisionModel(options.config.model);
-    /**
-     * The text moderation configuration.
-     * @remarks
-     * This variable stores the text moderation settings obtained from the app configuration.
-     * @author H0llyW00dzZ
-     */
-    const textmoderation = useAppConfig.getState().textmoderation;
-    const checkprovider = getProviderFromState();
-    const userMessageS = options.messages.filter((msg) => msg.role === "user");
-    const lastUserMessageContent = userMessageS[userMessageS.length - 1]?.content;
-    let textToModerate = '';
-
-    if (typeof lastUserMessageContent === 'string') {
-      textToModerate = lastUserMessageContent;
-    } else if (Array.isArray(lastUserMessageContent)) {
-      // If it's an array of MultimodalContent, concatenate all text elements into a single string
-      textToModerate = lastUserMessageContent
-        .filter(content => content.type === 'text' && typeof content.text === 'string')
-        .map(content => content.text)
-        .join(' ');
-    }
-
-    // Now textToModerate is guaranteed to be a string
-    const moderationPath = this.path(OpenaiPath.ModerationPath);
-
-    // Check if text moderation is enabled and required
-    if (textmoderation !== false &&
-      options.whitelist !== true &&
-      checkprovider !== ServiceProvider.Azure &&
-      textToModerate) { // Ensure textToModerate is not empty
-      try {
-        // Call the moderateText method and handle the result
-        const moderationResult = await moderateText(moderationPath, textToModerate, OpenaiPath.TextModerationModels.latest);
-        if (moderationResult) {
-          options.onFinish(moderationResult); // Finish early if moderationResult is not null
-          return;
-        }
-      } catch (error) {
-        // Handle errors from moderateText
-        let errorMessage = 'An unknown error occurred during text moderation.';
-        if (error instanceof Error) {
-          errorMessage = error.message;
-          try {
-            // Attempt to parse the error message as JSON
-            const errorObj = JSON.parse(errorMessage.substring(errorMessage.indexOf('{')));
-            // Pretty-print the JSON error message
-            errorMessage = prettyObject(errorObj);
-          } catch {
-            // If parsing or formatting fails, use the original error message
-          }
-        }
-        // Format the error message for user-friendly display
-        const formattedError = Locale.Error.TextModerationErr + `\n${errorMessage}`;
-        // Use the onFinish callback or similar to display the error in the chat interface
-        options.onFinish(formattedError);
-        return;
-      }
-    }
-
     const messages = options.messages.map((v) => ({
       role: v.role,
       content: visionModel ? v.content : getMessageTextContent(v),
@@ -214,15 +143,6 @@ export class ChatGPTApi implements LLMApi {
       modelConfig.max_tokens,
       modelConfig.useMaxTokens,
     );
-
-    /**
-     * Payloads for making requests to the OpenAI API.
-     * 
-     * @remarks
-     * This object contains two properties: `chat` and `image`. The `chat` payload is used for sending chat messages to the API, while the `image` payload is used for generating images based on a prompt.
-     * 
-     * @author H0llyW00dzZ
-     */
     const requestPayloads = {
       chat: {
         messages,
@@ -232,30 +152,21 @@ export class ChatGPTApi implements LLMApi {
         presence_penalty: modelConfig.presence_penalty,
         frequency_penalty: modelConfig.frequency_penalty,
         top_p: modelConfig.top_p,
-        // beta test for new model's since it consumed much tokens
-        // max is 4096
         ...(max_tokens !== undefined ? { max_tokens } : {}), // Spread the max_tokens value if defined
-        // not yet ready
-        //...{ system_fingerprint }, // Spread the system_fingerprint value
+        // max_tokens: Math.max(modelConfig.max_tokens, 1024),
+        // Please do not ask me why not send max_tokens, no reason, this param is just shit, I dont want to explain anymore.
+      
       },
-      image: {
-        model: actualModel,
-        prompt: userMessage,
-        n: modelConfig.n,
-        quality: modelConfig.quality,
-        style: modelConfig.style,
-        size: modelConfig.size,
+    image: {
+      model: actualModel,
+      prompt: userMessage,
+      n: modelConfig.n,
+      quality: modelConfig.quality,
+      style: modelConfig.style,
+      size: modelConfig.size,
       },
     };
 
-    /**
-     * Represents the magic payload typescript parameter 🎩 🪄.
-     * 
-     * @remarks
-     * This constant includes the provider and is used to store the result of the `getNewStuff` method.
-     * 
-     * @author H0llyW00dzZ
-     */
     const magicPayload = getNewStuff(defaultModel);
     const provider = getProviderFromState();
 
@@ -340,8 +251,6 @@ export class ChatGPTApi implements LLMApi {
       } else {
         chatPath = this.path(OpenaiPath.ChatPath);
       }
-
-
       const chatPayload = {
         method: "POST",
         body: JSON.stringify(requestPayload),
@@ -399,7 +308,10 @@ export class ChatGPTApi implements LLMApi {
           async onopen(res) {
             clearTimeout(requestTimeoutId);
             const contentType = res.headers.get("content-type");
-            console.log(`[ServiceProvider] [${provider}] request response content type: `, contentType);
+            console.log(
+              "[OpenAI] request response content type: ",
+              contentType,
+            );
 
             if (contentType?.startsWith("text/plain")) {
               responseText = await res.clone().text();
@@ -470,11 +382,17 @@ export class ChatGPTApi implements LLMApi {
                 remainText += delta;
               }
 
-              if (textmoderation
-                && textmoderation.length > 0
-                && provider === ServiceProvider.Azure) {
-                const contentFilterResults = textmoderation?.[0]?.content_filter_results;
-                console.log(`[${provider}] [Text Moderation] flagged categories result:`, contentFilterResults);
+              if (
+                textmoderation &&
+                textmoderation.length > 0 &&
+                ServiceProvider.Azure
+              ) {
+                const contentFilterResults =
+                  textmoderation[0]?.content_filter_results;
+                console.log(
+                  `[${ServiceProvider.Azure}] [Text Moderation] flagged categories result:`,
+                  contentFilterResults,
+                );
               }
             } catch (e) {
               console.error("[Request] parse error", text, msg);
@@ -502,7 +420,6 @@ export class ChatGPTApi implements LLMApi {
       options.onError?.(e as Error);
     }
   }
-
   async usage() {
     const formatDate = (d: Date) =>
       `${d.getFullYear()}-${(d.getMonth() + 1).toString().padStart(2, "0")}-${d
@@ -518,12 +435,12 @@ export class ChatGPTApi implements LLMApi {
     const [used, subs] = await Promise.all([
       fetch(
         this.path(
-          `${OpenaiPath.UsagePath}?start_date=${startDate}&end_date=${endDate}`
+          `${OpenaiPath.UsagePath}?start_date=${startDate}&end_date=${endDate}`,
         ),
         {
           method: "GET",
           headers: getHeaders(),
-        }
+        },
       ),
       fetch(this.path(OpenaiPath.SubsPath), {
         method: "GET",
@@ -549,7 +466,6 @@ export class ChatGPTApi implements LLMApi {
 
     const total = (await subs.json()) as {
       hard_limit_usd?: number;
-      system_hard_limit_usd?: number;
     };
 
     if (response.error && response.error.type) {
@@ -564,18 +480,10 @@ export class ChatGPTApi implements LLMApi {
       total.hard_limit_usd = Math.round(total.hard_limit_usd * 100) / 100;
     }
 
-    if (total.system_hard_limit_usd) {
-      total.system_hard_limit_usd =
-        Math.round(total.system_hard_limit_usd * 100) / 100;
-    }
-
     return {
       used: response.total_usage,
-      total: {
-        hard_limit_usd: total.hard_limit_usd,
-        system_hard_limit_usd: total.system_hard_limit_usd,
-      },
-    } as unknown as LLMUsage;
+      total: total.hard_limit_usd,
+    } as LLMUsage;
   }
 
   async models(): Promise<LLMModel[]> {
