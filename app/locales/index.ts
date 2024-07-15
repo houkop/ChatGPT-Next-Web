@@ -95,7 +95,7 @@ function setItem(key: string, value: string) {
   } catch {}
 }
 
-function getLanguages() {
+function getLanguage() {
   try {
     const locale = new Intl.Locale(navigator.language).maximize();
     const region = locale?.region?.toLowerCase();
@@ -120,24 +120,7 @@ export function getLang(): Lang {
     return savedLang as Lang;
   }
 
-  const preferredLangs = getLanguages();
-  if (typeof preferredLangs === "string") return preferredLangs; // no language list, return the only lang
-
-  // loop for searching best language option based on user accepted language
-  let bestMatch: Lang | null = null;
-  for (let i = 0; i < preferredLangs.length; i++) {
-    for (const option of AllLangs) {
-      if (preferredLangs[i].toLowerCase().includes(option)) {
-        bestMatch = option;
-        break;
-      }
-    }
-    if (bestMatch) {
-      return bestMatch;
-    }
-  }
-
-  return DEFAULT_LANG;
+  return getLanguage();
 }
 
 export function changeLang(lang: Lang) {
