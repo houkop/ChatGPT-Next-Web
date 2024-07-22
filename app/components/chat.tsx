@@ -70,7 +70,7 @@ import {
   isVisionModel,
 } from "../utils";
 
-import { compressImage } from "@/app/utils/chat";
+import { uploadImage as uploadImageRemote } from "@/app/utils/chat";
 
 import dynamic from "next/dynamic";
 
@@ -1470,7 +1470,7 @@ function _Chat() {
               ...(await new Promise<string[]>((res, rej) => {
                 setUploading(true);
                 const imagesData: string[] = [];
-                compressImage(file, 256 * 1024)
+                uploadImageRemote(file)
                   .then((dataUrl) => {
                     imagesData.push(dataUrl);
                     setUploading(false);
@@ -1496,52 +1496,48 @@ function _Chat() {
   );
 
   async function uploadImage() {
-    const maxImages = 3;
-    if (uploading) return;
-    new Promise<string[]>((res, rej) => {
-      const fileInput = document.createElement("input");
-      fileInput.type = "file";
-      fileInput.accept =
-        "image/png, image/jpeg, image/webp, image/heic, image/heif";
-      fileInput.multiple = true;
-      fileInput.onchange = (event: any) => {
-        setUploading(true);
-        const files = event.target.files;
-        const imagesData: string[] = [];
-        for (let i = 0; i < files.length; i++) {
-          const file = event.target.files[i];
-          compressImage(file, 256 * 1024)
-            .then((dataUrl) => {
-              imagesData.push(dataUrl);
-              if (
-                imagesData.length + attachImages.length >= maxImages ||
-                imagesData.length === files.length
-              ) {
+    const images: string[] = [];
+    images.push(...attachImages);
+
+    images.push(
+      ...(await new Promise<string[]>((res, rej) => {
+        const fileInput = document.createElement("input");
+        fileInput.type = "file";
+        fileInput.accept =
+          "image/png, image/jpeg, image/webp, image/heic, image/heif";
+        fileInput.multiple = true;
+        fileInput.onchange = (event: any) => {
+          setUploading(true);
+          const files = event.target.files;
+          const imagesData: string[] = [];
+          for (let i = 0; i < files.length; i++) {
+            const file = event.target.files[i];
+            uploadImageRemote(file)
+              .then((dataUrl) => {
+                imagesData.push(dataUrl);
+                if (
+                  imagesData.length === 3 ||
+                  imagesData.length === files.length
+                ) {
+                  setUploading(false);
+                  res(imagesData);
+                }
+              })
+              .catch((e) => {
                 setUploading(false);
-                res(imagesData);
-              }
-            })
-            .catch((e) => {
-              rej(e);
-            });
-        }
-      };
-      fileInput.click();
-    })
-      .then((imagesData) => {
-        const images: string[] = [];
-        images.push(...attachImages);
-        images.push(...imagesData);
-        setAttachImages(images);
-        const imagesLength = images.length;
-        if (imagesLength > maxImages) {
-          images.splice(maxImages, imagesLength - maxImages);
-        }
-        setAttachImages(images);
-      })
-      .catch(() => {
-        setUploading(false);
-      });
+                rej(e);
+              });
+          }
+        };
+        fileInput.click();
+      })),
+    );
+
+    const imagesLength = images.length;
+    if (imagesLength > 3) {
+      images.splice(3, imagesLength - 3);
+    }
+    setAttachImages(images);
   }
 
   function openImageBox(src: string, alt?: string) {
