@@ -442,10 +442,7 @@ export function MaskPage() {
   const closeMaskModal = () => setEditingMaskId(undefined);
 
   const downloadAll = () => {
-    downloadAs(
-      masks.filter((v) => !v.builtin),
-      FileName.Masks,
-    );
+    downloadAs(JSON.stringify(masks.filter((v) => !v.builtin)), FileName.Masks);
   };
 
   const importFromFile = () => {
@@ -618,7 +615,12 @@ export function MaskPage() {
                 text={Locale.Mask.EditModal.Download}
                 key="export"
                 bordered
-                onClick={() => downloadAs(editingMask, `${editingMask.name}.json`)}
+                onClick={() =>
+                  downloadAs(
+                    JSON.stringify(editingMask),
+                    `${editingMask.name}.json`,
+                  )
+                }
               />,
               <IconButton
                 key="copy"

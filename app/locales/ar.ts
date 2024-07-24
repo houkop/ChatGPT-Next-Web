@@ -62,12 +62,7 @@ const ar: PartialLocaleType = {
     Copy: "نسخ الكل",
     Download: "تنزيل",
     MessageFromYou: "رسالة منك",
-    MessageFromChatGPT: {
-      NoRole: "رسالة من ChatGPT",
-      RoleAssistant: "مساعد",
-      RoleSystem: "النظام",
-      SysMemoryPrompt: "تذكير الذاكرة النظامية",
-    },
+    MessageFromChatGPT: "رسالة من ChatGPT",
     Share: "مشاركة على ShareGPT",
     Format: {
       Title: "صيغة التصدير",
@@ -140,10 +135,6 @@ const ar: PartialLocaleType = {
       Title: "عرض معاينة الـ Send",
       SubTitle: "معاينة Markdown في فقاعة",
     },
-    AutoScrollMessage: {
-      Title: "الرد التلقائي للتمرير",
-      SubTitle: "تمرير الرسالة أثناء الرد",
-    },
     Mask: {
       Splash: {
         Title: "شاشة تظهر الأقنعة",
@@ -180,14 +171,11 @@ ${builtin} مدمجة، ${custom} تم تعريفها من قبل المستخد
     Usage: {
       Title: "رصيد الحساب",
       SubTitle(used: any, total: any) {
-        const hardLimitusd = total.hard_limit_usd !== undefined ? new Intl.NumberFormat('ar-EG', { style: 'currency', currency: 'USD' }).format(total.hard_limit_usd) : "غير معروف";
-        const hardLimit = total.system_hard_limit_usd !== undefined ? new Intl.NumberFormat('ar-EG', { style: 'currency', currency: 'USD' }).format(total.system_hard_limit_usd) : "غير معروف";
-        const usedFormatted = new Intl.NumberFormat('ar-EG', { style: 'currency', currency: 'USD' }).format(used);
-        return `المستخدمة هذا الشهر: ${usedFormatted}، الحد الأقصى الصعب: ${hardLimitusd}، الحد المسموح به للاستخدام: ${hardLimit}`;
+        return `تم استخدام $${used} من هذا الشهر، الاشتراك ${total}`;
       },
       IsChecking: "جارٍ التحقق...",
       Check: "التحقق",
-      NoAccess: `أدخل مفتاح الجلسة في مفتاح واجهة برمجة التطبيقات بدءًا من البادئة "sess-" للتحقق من الرصيد.`,
+      NoAccess: "أدخل مفتاح API للتحقق من الرصيد",
     },
 
     Model: "النموذج",
@@ -236,10 +224,6 @@ ${builtin} مدمجة، ${custom} تم تعريفها من قبل المستخد
   },
   FineTuned: {
     Sysmessage: "أنت مساعد ي",
-  },
-  PrivacyPage: {
-    Name: "الخصوصية",
-    Confirm: "موافق",
   },
   Mask: {
     Name: "الأقنعة",
@@ -292,7 +276,6 @@ ${builtin} مدمجة، ${custom} تم تعريفها من قبل المستخد
     Cancel: "إلغاء",
     Close: "إغلاق",
     Create: "إنشاء",
-    Continue: "استمرار",
     Edit: "تعديل",
   },
   Exporter: {

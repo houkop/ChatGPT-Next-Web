@@ -12,7 +12,7 @@ import LoadingIcon from "../icons/three-dots.svg";
 import { getCSSVar, useMobileScreen } from "../utils";
 
 import dynamic from "next/dynamic";
-import { ModelProvider, Path, SlotID, DEFAULT_CORS_HOST } from "../constant";
+import { Path, SlotID } from "../constant";
 import { ErrorBoundary } from "./error";
 
 import { getISOLang, getLang } from "../locales";
@@ -110,7 +110,7 @@ const useHasHydrated = () => {
 const loadAsyncGoogleFont = () => {
   const linkEl = document.createElement("link");
   const proxyFontUrl = "/google-fonts";
-  const remoteFontUrl = `${DEFAULT_CORS_HOST}/google-fonts`; // we use proxy in client app
+  const remoteFontUrl = "https://fonts.googleapis.com";
   const googleFontUrl =
     getClientConfig()?.buildMode === "export" ? remoteFontUrl : proxyFontUrl;
   linkEl.rel = "stylesheet";
@@ -192,7 +192,7 @@ export function Home() {
   }, []);
 
   if (!useHasHydrated()) {
-    return <Loading/>;
+    return <Loading />;
   }
 
   return (

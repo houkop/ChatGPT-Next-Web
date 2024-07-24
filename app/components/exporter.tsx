@@ -1,5 +1,5 @@
 /* eslint-disable @next/next/no-img-element */
-import { ChatMessage, ModelType, useAccessStore, useAppConfig, useChatStore } from "../store";
+import { ChatMessage, ModelType, useAppConfig, useChatStore } from "../store";
 import Locale from "../locales";
 import styles from "./exporter.module.scss";
 import {
@@ -36,7 +36,7 @@ import { toBlob, toPng } from "html-to-image";
 import { DEFAULT_MASK_AVATAR } from "../store/mask";
 
 import { prettyObject } from "../utils/format";
-import { EXPORT_MESSAGE_CLASS_NAME, ModelProvider, REPO_URL } from "../constant";
+import { EXPORT_MESSAGE_CLASS_NAME } from "../constant";
 import { getClientConfig } from "../config/client";
 import { type ClientApi, getClientApi } from "../client/api";
 import { getMessageTextContent } from "../utils";
@@ -155,7 +155,6 @@ export function MessageExporter() {
   const [exportConfig, setExportConfig] = useState({
     format: "image" as ExportFormat,
     includeContext: true,
-    includeSysMemoryPrompt: true,
   });
 
   function updateExportConfig(updater: (config: typeof exportConfig) => void) {
@@ -172,35 +171,22 @@ export function MessageExporter() {
     if (exportConfig.includeContext) {
       ret.push(...session.mask.context);
     }
-    if (exportConfig.includeSysMemoryPrompt && session.memoryPrompt) {
-      // this a nothing only bypassing that warning react component while compiling it into binary (desktop app aka tauri)
-    }
     ret.push(...session.messages.filter((m) => selection.has(m.id)));
     return ret;
   }, [
     exportConfig.includeContext,
-    exportConfig.includeSysMemoryPrompt, // Now it's being used
     session.messages,
     session.mask.context,
     selection,
-    session.memoryPrompt, // Hypothetical dependency
   ]);
   function preview() {
     if (exportConfig.format === "text") {
       return (
-        <MarkdownPreviewer
-          messages={selectedMessages}
-          topic={session.topic}
-          includeSysMemoryPrompt={exportConfig.includeSysMemoryPrompt}
-          />
+        <MarkdownPreviewer messages={selectedMessages} topic={session.topic} />
       );
     } else if (exportConfig.format === "json") {
       return (
-        <JsonPreviewer
-          messages={selectedMessages}
-          topic={session.topic}
-          includeSysMemoryPrompt={exportConfig.includeSysMemoryPrompt}
-        />
+        <JsonPreviewer messages={selectedMessages} topic={session.topic} />
       );
     } else {
       return (
@@ -208,7 +194,6 @@ export function MessageExporter() {
       );
     }
   }
-
   return (
     <>
       <Steps
@@ -251,20 +236,6 @@ export function MessageExporter() {
               onChange={(e) => {
                 updateExportConfig(
                   (config) => (config.includeContext = e.currentTarget.checked),
-                );
-              }}
-            ></input>
-          </ListItem>
-          <ListItem
-            title={Locale.Export.IncludeSysMemoryPrompt.Title}
-            subTitle={Locale.Export.IncludeSysMemoryPrompt.SubTitle}
-          >
-            <input
-              type="checkbox"
-              checked={exportConfig.includeSysMemoryPrompt}
-              onChange={(e) => {
-                updateExportConfig(
-                  (config) => (config.includeSysMemoryPrompt = e.currentTarget.checked),
                 );
               }}
             ></input>
@@ -487,38 +458,6 @@ export function ImagePreviewer(props: {
 
   const isMobile = useMobileScreen();
 
-  const replaceImageUrls = async (dom: { querySelectorAll: (arg0: string) => any; }) => {
-    // Select both img and a tags in the DOM
-    const elementsWithUrls = dom.querySelectorAll('img, a');
-  
-    for (const element of elementsWithUrls) {
-      if (element.closest('.user-avatar')) continue;
-      if (element.tagName === 'IMG' && element.alt === 'bot') continue;
-      if (element.tagName === 'IMG' && element.alt === 'logo') continue;
-      let imageUrl = element.tagName === 'IMG' ? element.src : element.href;
-
-      const response = await fetch(
-        "/api/transferimg", 
-        {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({ imageUrl }),
-      }
-      )
-  
-      // If the API call is successful, replace the URL
-      if (response.ok) {
-        const data = await response.json();
-        if (element.tagName === 'IMG') {
-          element.src = data.newImageUrl; // Update image source
-        } else {
-          element.href = data.newImageUrl; // Update link href
-        }
-      }
-    }
-  };
-  
-
   const download = async () => {
     showToast(Locale.Export.Image.Toast);
     const dom = previewRef.current;
@@ -527,19 +466,13 @@ export function ImagePreviewer(props: {
     const isApp = getClientConfig()?.isApp;
 
     try {
-      await replaceImageUrls(dom);
       const blob = await toPng(dom);
       if (!blob) return;
 
       if (isMobile || (isApp && window.__TAURI__)) {
         if (isApp && window.__TAURI__) {
-          /**
-           * Fixed Tauri client app
-           * Resolved the issue where files couldn't be saved when there was a `:` in the dialog.
-           */
-          const fileName = props.topic.replace(/:/g, '');
           const result = await window.__TAURI__.dialog.save({
-            defaultPath: `${fileName}.png`,
+            defaultPath: `${props.topic}.png`,
             filters: [
               {
                 name: "PNG Files",
@@ -574,7 +507,7 @@ export function ImagePreviewer(props: {
     } catch (error) {
       showToast(Locale.Download.Failed);
     }
-  };  
+  };
 
   const refreshPreview = () => {
     const dom = previewRef.current;
@@ -582,8 +515,6 @@ export function ImagePreviewer(props: {
       dom.innerHTML = dom.innerHTML; // Refresh the content of the preview by resetting its HTML for fix a bug glitching
     }
   };
-
-  const accessStore = useAccessStore.getState();
 
   return (
     <div className={styles["image-previewer"]}>
@@ -610,7 +541,7 @@ export function ImagePreviewer(props: {
           <div>
             <div className={styles["main-title"]}>NextChat</div>
             <div className={styles["sub-title"]}>
-              Build your own AI assistant.
+              github.com/Yidadaa/ChatGPT-Next-Web
             </div>
             <div className={styles["icons"]}>
               <ExportAvatar avatar={config.avatar} />
@@ -620,22 +551,16 @@ export function ImagePreviewer(props: {
           </div>
           <div>
             <div className={styles["chat-info-item"]}>
-            {"🔗"} {REPO_URL}
+              {Locale.Exporter.Model}: {mask.modelConfig.model}
             </div>
             <div className={styles["chat-info-item"]}>
-            {"🤖"} {Locale.Exporter.Model}: {mask.modelConfig.model}
+              {Locale.Exporter.Messages}: {props.messages.length}
             </div>
             <div className={styles["chat-info-item"]}>
-            {"🚀"} {Locale.Exporter.ServiceProvider}: {accessStore.provider}
+              {Locale.Exporter.Topic}: {session.topic}
             </div>
             <div className={styles["chat-info-item"]}>
-            {"💭"} {Locale.Exporter.Messages}: {props.messages.length}
-            </div>
-            <div className={styles["chat-info-item"]}>
-            {"💫"} {Locale.Exporter.Topic}: {session.topic}
-            </div>
-            <div className={styles["chat-info-item"]}>
-            {"🗓️"} {Locale.Exporter.Time}:{" "}
+              {Locale.Exporter.Time}:{" "}
               {new Date(
                 props.messages.at(-1)?.date ?? Date.now(),
               ).toLocaleString()}
@@ -643,22 +568,15 @@ export function ImagePreviewer(props: {
           </div>
         </div>
         {props.messages.map((m, i) => {
-          const isUserMessage = m.role === "user";
-          const isSystemMessage = m.role === "system";
-          const avatar =
-            isUserMessage && config.avatar
-              ? config.avatar
-              : isSystemMessage
-              ? "1f4ab"
-              : mask.avatar;
-          const messageClass = `${styles["message"]} ${
-            styles["message-" + m.role]
-          }`;
-
           return (
-            <div className={messageClass} key={i}>
+            <div
+              className={styles["message"] + " " + styles["message-" + m.role]}
+              key={i}
+            >
               <div className={styles["avatar"]}>
-                <ExportAvatar avatar={avatar} />
+                <ExportAvatar
+                  avatar={m.role === "user" ? config.avatar : mask.avatar}
+                />
               </div>
 
               <div className={styles["body"]}>
@@ -706,17 +624,9 @@ export function ImagePreviewer(props: {
 export function MarkdownPreviewer(props: {
   messages: ChatMessage[];
   topic: string;
-  includeSysMemoryPrompt: boolean;
 }) {
-  const chatStore = useChatStore();
-  const session = chatStore.currentSession();
-  const memoryPrompt = session.memoryPrompt;
-  const systemMessage = memoryPrompt || "";
   const mdText =
-    `# ${"💫"} ${Locale.Exporter.Topic}: ${props.topic}\n\n` +
-    (props.includeSysMemoryPrompt && systemMessage
-      ? `## ${"⚙️"} ${"🧠"} ${Locale.Export.MessageFromChatGPT.SysMemoryPrompt}:\n${systemMessage}\n\n`
-      : "") +
+    `# ${props.topic}\n\n` +
     props.messages
       .map((m) => {
         return m.role === "user"
@@ -730,53 +640,9 @@ export function MarkdownPreviewer(props: {
   const copy = () => {
     copyToClipboard(mdText);
   };
-  const download = async () => {
-    const isApp = getClientConfig()?.isApp;
-    const blob = new Blob([mdText], { type: "text/markdown" });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = `${props.topic}.md`;
-  
-    if (isApp && window.__TAURI__) {
-      try {
-        const fileName = props.topic.replace(/:/g, '');
-        const result = await window.__TAURI__.dialog.save({
-        /**
-         * Fixed Tauri client app
-         * Resolved the issue where files couldn't be saved when there was a `:` in the dialog.
-         */
-          defaultPath: `${fileName}.md`,
-          filters: [
-            {
-              name: "MD Files",
-              extensions: ["md"],
-            },
-            {
-              name: "All Files",
-              extensions: ["*"],
-            },
-          ],
-        });
-  
-        if (result !== null) {
-          const response = await fetch(url);
-          const buffer = await response.arrayBuffer();
-          const uint8Array = new Uint8Array(buffer);
-          await window.__TAURI__.fs.writeBinaryFile(result, uint8Array);
-          showToast(Locale.Download.Success);
-        } else {
-          showToast(Locale.Download.Failed);
-        }
-      } catch (error) {
-        showToast(Locale.Download.Failed);
-      }
-    } else {
-      link.click();
-    }
-  
-    URL.revokeObjectURL(url);
-  };  
+  const download = () => {
+    downloadAs(mdText, `${props.topic}.md`);
+  };
   return (
     <>
       <PreviewActions
@@ -795,17 +661,13 @@ export function MarkdownPreviewer(props: {
 export function JsonPreviewer(props: {
   messages: ChatMessage[];
   topic: string;
-  includeSysMemoryPrompt: boolean;
 }) {
-  const chatStore = useChatStore();
-  const session = chatStore.currentSession();
-  const memoryPrompt = session.memoryPrompt;
-  const systemMessage = memoryPrompt || "";
   const msgs = {
     messages: [
-      ...(props.includeSysMemoryPrompt && systemMessage
-        ? [{ role: "system", content: systemMessage }]
-        : []),
+      {
+        role: "system",
+        content: `${Locale.FineTuned.Sysmessage} ${props.topic}`,
+      },
       ...props.messages.map((m) => ({
         role: m.role,
         content: m.content,
@@ -819,7 +681,7 @@ export function JsonPreviewer(props: {
     copyToClipboard(minifiedJson);
   };
   const download = () => {
-    downloadAs(msgs, `${props.topic}.json`); // Pass msgs instead of (msgs) to the downloadAs function
+    downloadAs(JSON.stringify(msgs), `${props.topic}.json`);
   };
 
   return (

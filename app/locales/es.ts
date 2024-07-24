@@ -41,12 +41,7 @@ const es: PartialLocaleType = {
     Copy: "Copiar todo",
     Download: "Descargar",
     MessageFromYou: "Mensaje de ti",
-    MessageFromChatGPT: {
-      NoRole: "Mensaje de ChatGPT",
-      RoleAssistant: "Asistente",
-      RoleSystem: "Sistema",
-      SysMemoryPrompt: "Indicación de Memoria del Sistema",
-    },
+    MessageFromChatGPT: "Mensaje de ChatGPT",
   },
   Memory: {
     Title: "Historial de memoria",
@@ -96,10 +91,6 @@ const es: PartialLocaleType = {
       Title: "Enviar burbuja de vista previa",
       SubTitle: "Preview markdown in bubble",
     },
-    AutoScrollMessage: {
-      Title: "Respuesta con Auto-Desplazamiento",
-      SubTitle: "Desplazar el mensaje durante la respuesta",
-    },
     Mask: {
       Splash: {
         Title: "Mask Splash Screen",
@@ -137,14 +128,11 @@ const es: PartialLocaleType = {
     Usage: {
       Title: "Saldo de la cuenta",
       SubTitle(used: any, total: any) {
-        const hardLimitusd = total.hard_limit_usd !== undefined ? new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'USD' }).format(total.hard_limit_usd) : "desconocido";
-        const hardLimit = total.system_hard_limit_usd !== undefined ? new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'USD' }).format(total.system_hard_limit_usd) : "desconocido";
-        const usedFormatted = new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'USD' }).format(used);
-        return `Usado este mes: ${usedFormatted}, Límite máximo: ${hardLimitusd}, Límite de uso aprobado: ${hardLimit}`;
+        return `Usado $${used}, subscription $${total}`;
       },
       IsChecking: "Comprobando...",
       Check: "Comprobar de nuevo",
-      NoAccess: `Ingresa la clave de sesión en la clave API comenzando con el prefijo "sess-" para verificar el saldo.`,
+      NoAccess: "Introduzca la clave API para comprobar el saldo",
     },
 
     Model: "Modelo",
@@ -197,10 +185,6 @@ const es: PartialLocaleType = {
   FineTuned: {
     Sysmessage: "Eres un asistente que",
   },
-  PrivacyPage: {
-    Name: "Privacidad",
-    Confirm: "Aceptar",
-  },
   Mask: {
     Name: "Mask",
     Page: {
@@ -243,7 +227,6 @@ const es: PartialLocaleType = {
     Cancel: "Cancel",
     Close: "Close",
     Create: "Create",
-    Continue: "Continuar",
     Edit: "Edit",
   },
   Exporter: {

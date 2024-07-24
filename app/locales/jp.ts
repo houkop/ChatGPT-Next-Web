@@ -53,12 +53,7 @@ const jp: PartialLocaleType = {
     Copy: "すべてコピー",
     Download: "ファイルをダウンロード",
     MessageFromYou: "あなたからのメッセージ",
-    MessageFromChatGPT: {
-      NoRole: "ChatGPTからのメッセージ",
-      RoleAssistant: "アシスタント",
-      RoleSystem: "システム",
-      SysMemoryPrompt: "システムメモリプロンプト",
-    },
+    MessageFromChatGPT: "ChatGPTからのメッセージ",
     Format: {
       Title: "フォーマットをエクスポート",
       SubTitle: "マークダウン形式、PNG画像形式を選択できます。",
@@ -147,10 +142,6 @@ const jp: PartialLocaleType = {
       Title: "プレビューバブルの送信",
       SubTitle: "プレビューバブルでマークダウンコンテンツをプレビュー",
     },
-    AutoScrollMessage: {
-      Title: "オートスクロール返信",
-      SubTitle: "返信中にメッセージをスクロール",
-    },
     Mask: {
       Splash: {
         Title: "キャラクターページ",
@@ -193,14 +184,11 @@ const jp: PartialLocaleType = {
     Usage: {
       Title: "残高照会",
       SubTitle(used: any, total: any) {
-        const hardLimitusd = total.hard_limit_usd !== undefined ? new Intl.NumberFormat('ja-JP', { style: 'currency', currency: 'USD' }).format(total.hard_limit_usd) : "不明";
-        const hardLimit = total.system_hard_limit_usd !== undefined ? new Intl.NumberFormat('ja-JP', { style: 'currency', currency: 'USD' }).format(total.system_hard_limit_usd) : "不明";
-        const usedFormatted = new Intl.NumberFormat('ja-JP', { style: 'currency', currency: 'USD' }).format(used);
-        return `今月の使用額：${usedFormatted}、ハードリミット：${hardLimitusd}、承認された使用制限：${hardLimit}`;
+        return `今月は $${used} を使用しました。総額は $${total} です。`;
       },
       IsChecking: "確認中...",
       Check: "再確認",
-      NoAccess: `残高を確認するには、APIキーの先頭に「sess-」を付けたセッションキーを入力してください。`,
+      NoAccess: "APIキーまたはアクセスパスワードを入力して残高を表示",
     },
     Model: "モデル (model)",
     Temperature: {
@@ -250,10 +238,6 @@ const jp: PartialLocaleType = {
   },
   Plugin: { Name: "プラグイン" },
   FineTuned: { Sysmessage: "あなたはアシスタントです" },
-  PrivacyPage: {
-    Name: "プライバシー",
-    Confirm: "同意する",
-  },
   Mask: {
     Name: "キャラクタープリセット",
     Page: {
@@ -306,7 +290,6 @@ const jp: PartialLocaleType = {
     Cancel: "キャンセル",
     Close: "閉じる",
     Create: "新規",
-    Continue: "続ける",
     Edit: "編集",
   },
   Exporter: {

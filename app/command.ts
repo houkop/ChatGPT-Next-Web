@@ -1,11 +1,8 @@
 import { useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 import Locale from "./locales";
-import { getClientConfig } from "@/app/config/client";
 
-const isApp = !!getClientConfig()?.isApp;
-
-type Command = (param?: string) => void;
+type Command = (param: string) => void;
 interface Commands {
   fill?: Command;
   submit?: Command;
@@ -40,25 +37,13 @@ interface ChatCommands {
   newm?: Command;
   next?: Command;
   prev?: Command;
-  restart?: Command;
   clear?: Command;
   del?: Command;
-  save?: Command;
-  load?: Command;
-  copymemoryai?: Command;
-  updatemasks?: Command;
-  summarize?: Command;
 }
 
 export const ChatCommandPrefix = ":";
 
 export function useChatCommand(commands: ChatCommands = {}) {
-  const chatCommands = { ...commands };
-
-  if (!isApp) {
-    delete chatCommands.restart;
-  }
-
   function extract(userInput: string) {
     return (
       userInput.startsWith(ChatCommandPrefix) ? userInput.slice(1) : userInput
@@ -68,7 +53,7 @@ export function useChatCommand(commands: ChatCommands = {}) {
   function search(userInput: string) {
     const input = extract(userInput);
     const desc = Locale.Chat.Commands;
-    return Object.keys(chatCommands)
+    return Object.keys(commands)
       .filter((c) => c.startsWith(input))
       .map((c) => ({
         title: desc[c as keyof ChatCommands],
@@ -77,21 +62,12 @@ export function useChatCommand(commands: ChatCommands = {}) {
   }
 
   function match(userInput: string) {
-    if (!userInput.startsWith(ChatCommandPrefix)) {
-      return { matched: false, invoke: () => {} };
-    }
-  
-    const commandKey = extract(userInput);
-    const command = chatCommands[commandKey];
-    const matched = typeof command === "function";
-  
+    const command = extract(userInput);
+    const matched = typeof commands[command] === "function";
+
     return {
       matched,
-      invoke: () => {
-        if (matched) {
-          command();
-        }
-      },
+      invoke: () => matched && commands[command]!(userInput),
     };
   }
 

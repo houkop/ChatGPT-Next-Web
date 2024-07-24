@@ -27,13 +27,8 @@ import {
   EventStreamContentType,
   fetchEventSource,
 } from "@fortaine/fetch-event-source";
-import { 
-  getNewStuff,
-  getModelForInstructVersion,
-} from './NewStuffLLMs';
 import { prettyObject } from "@/app/utils/format";
 import { getClientConfig } from "@/app/config/client";
-import { getProviderFromState } from "@/app/utils";
 import {
   getMessageTextContent,
   getMessageImages,
@@ -128,105 +123,31 @@ export class ChatGPTApi implements LLMApi {
       },
     };
 
-    const cfgspeed_animation = useAppConfig.getState().speed_animation;       
-
-    const defaultModel = modelConfig.model;
-
-    const userMessages = messages.filter((msg) => msg.role === "user");
-    const userMessage = userMessages[userMessages.length - 1]?.content;
-    /**
-     * Represents the actual model used for DALL·E Models.
-     * @author H0llyW00dzZ
-     * @remarks This is the actual model used for DALL·E Models.
-     * @usage in this chat: prompt
-     * @example : A Best Picture of Andromeda Galaxy
-     */
-    const actualModel = getModelForInstructVersion(modelConfig.model);
-    const { max_tokens } = getNewStuff(
-      modelConfig.model,
-      modelConfig.max_tokens,
-      modelConfig.useMaxTokens,
-    );
-    const requestPayloads = {
-      chat: {
-        messages,
-        stream: options.config.stream,
-        model: modelConfig.model,
-        temperature: modelConfig.temperature,
-        presence_penalty: modelConfig.presence_penalty,
-        frequency_penalty: modelConfig.frequency_penalty,
-        top_p: modelConfig.top_p,
-        ...(max_tokens !== undefined ? { max_tokens } : {}), // Spread the max_tokens value if defined
-        // max_tokens: Math.max(modelConfig.max_tokens, 1024),
-        // Please do not ask me why not send max_tokens, no reason, this param is just shit, I dont want to explain anymore.
-      
-      },
-    image: {
-      model: actualModel,
-      prompt: userMessage,
-      n: modelConfig.n,
-      quality: modelConfig.quality,
-      style: modelConfig.style,
-      size: modelConfig.size,
-      },
+    const requestPayload: RequestPayload = {
+      messages,
+      stream: options.config.stream,
+      model: modelConfig.model,
+      temperature: modelConfig.temperature,
+      presence_penalty: modelConfig.presence_penalty,
+      frequency_penalty: modelConfig.frequency_penalty,
+      top_p: modelConfig.top_p,
+      // max_tokens: Math.max(modelConfig.max_tokens, 1024),
+      // Please do not ask me why not send max_tokens, no reason, this param is just shit, I dont want to explain anymore.
     };
 
-    const magicPayload = getNewStuff(defaultModel);
-    const provider = getProviderFromState();
-
-    let payload;
-    if (magicPayload.isDalle) {
-      if (defaultModel.includes("dall-e-2")) {
-        const { quality, style, ...imagePayload } = requestPayloads.image;
-        payload = { image: imagePayload };
-      } else {
-        payload = { image: requestPayloads.image };
-      }
-    } else if (magicPayload.isNewModel) {
-      payload = { chat: requestPayloads.chat };
-    } else {
-      const { max_tokens, ...oldChatPayload } = requestPayloads.chat;
-      payload = { chat: oldChatPayload };
+    // add max_tokens to vision model
+    if (visionModel && modelConfig.model.includes("preview")) {
+      requestPayload["max_tokens"] = Math.max(modelConfig.max_tokens, 4000);
     }
 
-    console.log(`[Request] [${provider}] payload: `, payload);
+    console.log("[Request] openai payload: ", requestPayload);
 
     const shouldStream = !!options.config.stream;
     const controller = new AbortController();
     options.onController?.(controller);
 
     try {
-      /**
-       * Represents the dallemodels variable.
-       * @author H0llyW00dzZ
-       */
-      const dallemodels = magicPayload.isDalle;
-
-      let chatPath = dallemodels
-        ? this.path(OpenaiPath.ImageCreationPath)
-        : this.path(OpenaiPath.ChatPath);
-
-      let requestPayload;
-      if (dallemodels) {
-        /**
-         * Author : @H0llyW00dzZ
-         * Use the image payload structure
-         */
-        if (defaultModel.includes("dall-e-2")) {
-          /**
-           * Magic TypeScript payload parameter 🎩 🪄
-           **/
-          const { quality, style, ...imagePayload } = requestPayloads.image;
-          requestPayload = imagePayload;
-        } else {
-          requestPayload = requestPayloads.image;
-        }
-      } else {
-        /**
-         * Use the chat model payload structure
-         */
-        requestPayload = requestPayloads.chat;
-      }
+      let chatPath = "";
       if (modelConfig.providerName === ServiceProvider.Azure) {
         // find model, and get displayName as deployName
         const { models: configModels, customModels: configCustomModels } =
@@ -285,7 +206,7 @@ export class ChatGPTApi implements LLMApi {
           }
 
           if (remainText.length > 0) {
-            const fetchCount = Math.max(1, Math.round(remainText.length / cfgspeed_animation));
+            const fetchCount = Math.max(1, Math.round(remainText.length / 60));
             const fetchText = remainText.slice(0, fetchCount);
             responseText += fetchText;
             remainText = remainText.slice(fetchCount);
@@ -319,29 +240,9 @@ export class ChatGPTApi implements LLMApi {
 
             if (contentType?.startsWith("text/plain")) {
               responseText = await res.clone().text();
-            } else if (contentType?.startsWith("application/json")) {
-              const jsonResponse = await res.clone().json();
-              // Generic JSON response handling
-              if (jsonResponse.data) {
-                if (magicPayload.isDalle) {
-                  // Specific handling for DALL·E responses
-                  const imageUrl = jsonResponse.data?.[0]?.url;
-                  const prompt = requestPayloads.image.prompt;
-                  const revised_prompt = jsonResponse.data?.[0]?.revised_prompt;
-                  const index = requestPayloads.image.n - 1;
-                  const size = requestPayloads.image.size;
-
-
-                  let imageDescription = `#### ${prompt} (${index + 1})\n\n\n | ![${imageUrl}](${imageUrl}) |\n|---|\n| Size: ${size} |\n| [Download Here](${imageUrl}) |\n| 🤖 AI Models: ${defaultModel} |`;
-                  if (defaultModel.includes("dall-e-3")) {
-                    imageDescription = `| ![${revised_prompt}](${imageUrl}) |\n|---|\n| Size: ${size} |\n| [Download Here](${imageUrl}) |\n| 🎩 🪄 Revised Prompt (${index + 1}): ${revised_prompt} |\n| 🤖 AI Models: ${defaultModel} |`;
-                  }
-                  responseText = `${imageDescription}`;
-                }
-                return; // this should be fix json response, unlike go so easy
-              }
+              return finish();
             }
-            // Handle non-OK responses or unexpected content types
+
             if (
               !res.ok ||
               !res.headers
@@ -349,13 +250,13 @@ export class ChatGPTApi implements LLMApi {
                 ?.startsWith(EventStreamContentType) ||
               res.status !== 200
             ) {
+              const responseTexts = [responseText];
               let extraInfo = await res.clone().text();
               try {
                 const resJson = await res.clone().json();
                 extraInfo = prettyObject(resJson);
-              } catch { }
+              } catch {}
 
-              const responseTexts = [responseText];
               if (res.status === 401) {
                 responseTexts.push(Locale.Error.Unauthorized);
               }
@@ -520,35 +421,5 @@ export class ChatGPTApi implements LLMApi {
       },
     }));
   }
-
-  /**
-   * Saves the image from the response to the local filesystem.
-   * @param imageResponse - The response containing the image data.
-   * @param filename - The name of the file to be saved.
-   * @returns A Promise that resolves when the image is saved successfully.
-   * @throws If there is an error while saving the image.
-   * @todo Implement the actual saving logic.
-   * @note This method is currently not used. and subject to changed if there is a better way to save or store the image. (e.g. using own blob storage or aws s3,etc)
-   * @author H0llyW00dzZ
-   */
-  private async saveImageFromResponse(imageResponse: any, filename: string): Promise<void> {
-    try {
-      const blob = await imageResponse.blob();
-
-      const url = URL.createObjectURL(blob);
-
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = filename;
-      link.click();
-
-      URL.revokeObjectURL(url);
-
-      console.log('Image saved successfully:', filename);
-    } catch (e) {
-      console.error('Failed to save image:', e);
-    }
-  }
 }
-
 export { OpenaiPath };

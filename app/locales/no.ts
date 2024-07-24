@@ -37,12 +37,7 @@ const no: PartialLocaleType = {
     Copy: "Kopiere alle",
     Download: "Last ned",
     MessageFromYou: "Melding fra deg",
-    MessageFromChatGPT: {
-      NoRole: "Melding fra ChatGPT",
-      RoleAssistant: "Assistent",
-      RoleSystem: "System",
-      SysMemoryPrompt: "Systemminneprompt",
-    },
+    MessageFromChatGPT: "Melding fra ChatGPT",
   },
   Memory: {
     Title: "Minneinstruks",
@@ -87,10 +82,6 @@ const no: PartialLocaleType = {
     SendKey: "Send nøkkel",
     Theme: "Tema",
     TightBorder: "Stram innramming",
-    AutoScrollMessage: {
-      Title: "Automatisk rulling av svar",
-      SubTitle: "Rull meldingen under svar",
-    },
     Prompt: {
       Disable: {
         Title: "Skru av autofullfør",
@@ -119,14 +110,11 @@ const no: PartialLocaleType = {
     Usage: {
       Title: "Saldo for konto",
       SubTitle(used: any, total: any) {
-        const hardLimitusd = total.hard_limit_usd !== undefined ? new Intl.NumberFormat('nn-NO', { style: 'currency', currency: 'USD' }).format(total.hard_limit_usd) : "ukjent";
-        const hardLimit = total.system_hard_limit_usd !== undefined ? new Intl.NumberFormat('nn-NO', { style: 'currency', currency: 'USD' }).format(total.system_hard_limit_usd) : "ukjent";
-        const usedFormatted = new Intl.NumberFormat('nn-NO', { style: 'currency', currency: 'USD' }).format(used);
-        return `Brukt denne månaden: ${usedFormatted}, Hard grense: ${hardLimitusd}, Godkjent bruksgrense: ${hardLimit}`;
+        return `Brukt denne måneden $${used}, abonnement $${total}`;
       },
       IsChecking: "Sjekker ...",
       Check: "Sjekk",
-      NoAccess: `Skriv inn øktnøkkelen i API-nøkkelen som starter med prefikset "sess-" for å sjekke saldoen.`,
+      NoAccess: "Skriv inn API-nøkkelen for å sjekke saldo",
     },
 
     Model: "Model",
@@ -167,10 +155,6 @@ const no: PartialLocaleType = {
     Messages: "Meldingar",
     Topic: "Emne",
     Time: "Tid",
-  },
-  PrivacyPage: {
-    Name: "Personvern",
-    Confirm: "Godta",
   },
 };
 

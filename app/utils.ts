@@ -1,10 +1,7 @@
-import { getClientConfig } from "./config/client";
 import { useEffect, useState } from "react";
 import { showToast } from "./components/ui-lib";
 import Locale from "./locales";
-import { useAccessStore } from "./store";
 import { RequestMessage } from "./client/api";
-import { DEFAULT_MODELS } from "./constant";
 
 export function trimTopic(topic: string) {
   // Fix an issue where double quotes still show in the Indonesian language
@@ -18,11 +15,9 @@ export function trimTopic(topic: string) {
   );
 }
 
-const isApp = !!getClientConfig()?.isApp;
-
 export async function copyToClipboard(text: string) {
   try {
-    if (isApp && window.__TAURI__) {
+    if (window.__TAURI__) {
       window.__TAURI__.writeText(text);
     } else {
       await navigator.clipboard.writeText(text);
@@ -44,115 +39,48 @@ export async function copyToClipboard(text: string) {
     document.body.removeChild(textArea);
   }
 }
-//To ensure the expected functionality, the default file format must be JSON.
-export async function downloadAs(text: object, filename: string) {
-  const json = JSON.stringify(text);
-  const blob = new Blob([json], { type: "application/json" });
-  const arrayBuffer = await blob.arrayBuffer();
-  const uint8Array = new Uint8Array(arrayBuffer);
 
-  try {
-    if (window.__TAURI__) {
-      /**
-       * Fixed client app [Tauri]
-       * Resolved the issue where files couldn't be saved when there was a `:` in the dialog.
-      **/
-      const fileName = filename.replace(/:/g, '');
-      const fileExtension = fileName.split('.').pop();
-      const result = await window.__TAURI__.dialog.save({
-        defaultPath: `${fileName}`,
-        filters: [
-          {
-            name: `${fileExtension} files`,
-            extensions: [`${fileExtension}`],
-          },
-          {
-            name: "All Files",
-            extensions: ["*"],
-          },
-        ],
-      });
+export async function downloadAs(text: string, filename: string) {
+  if (window.__TAURI__) {
+    const result = await window.__TAURI__.dialog.save({
+      defaultPath: `${filename}`,
+      filters: [
+        {
+          name: `${filename.split(".").pop()} files`,
+          extensions: [`${filename.split(".").pop()}`],
+        },
+        {
+          name: "All Files",
+          extensions: ["*"],
+        },
+      ],
+    });
 
-      if (result !== null) {
-        await window.__TAURI__.fs.writeBinaryFile(
-          result,
-          Uint8Array.from(uint8Array)
-        );
+    if (result !== null) {
+      try {
+        await window.__TAURI__.fs.writeTextFile(result, text);
         showToast(Locale.Download.Success);
-      } else {
+      } catch (error) {
         showToast(Locale.Download.Failed);
       }
     } else {
-      const url = URL.createObjectURL(blob);
-      const anchor = document.createElement("a");
-      anchor.href = url;
-      anchor.download = `${filename}`;
-      anchor.click();
-      URL.revokeObjectURL(url);
-      showToast(Locale.Download.Success);
+      showToast(Locale.Download.Failed);
     }
-  } catch (error) {
-    showToast(Locale.Download.Failed);
+  } else {
+    const element = document.createElement("a");
+    element.setAttribute(
+      "href",
+      "data:text/plain;charset=utf-8," + encodeURIComponent(text),
+    );
+    element.setAttribute("download", filename);
+
+    element.style.display = "none";
+    document.body.appendChild(element);
+
+    element.click();
+
+    document.body.removeChild(element);
   }
-}
-
-// Assuming you have a function to get the provider from the state
-export function getProviderFromState(): string {
-  const accessStore = useAccessStore.getState();
-  return accessStore.provider;
-}
-
-export function compressImage(file: File, maxSize: number): Promise<string> {
-  return new Promise((resolve, reject) => {
-    fetch(URL.createObjectURL(file))
-      .then((response) => response.blob())
-      .then((blob) => createImageBitmap(blob))
-      .then((imageBitmap) => {
-        let canvas = new OffscreenCanvas(imageBitmap.width, imageBitmap.height);
-        let ctx = canvas.getContext("2d");
-        let width = imageBitmap.width;
-        let height = imageBitmap.height;
-        let quality = 0.9;
-
-        const checkSizeAndPostMessage = () => {
-          canvas
-            .convertToBlob({ type: "image/jpeg", quality: quality })
-            .then((blob) => {
-              const reader = new FileReader();
-              reader.onloadend = function () {
-                const base64data = reader.result;
-                if (typeof base64data !== "string") {
-                  reject("Invalid base64 data");
-                  return;
-                }
-                if (base64data.length < maxSize) {
-                  resolve(base64data);
-                  return;
-                }
-                if (quality > 0.5) {
-                  // Prioritize quality reduction
-                  quality -= 0.1;
-                } else {
-                  // Then reduce the size
-                  width *= 0.9;
-                  height *= 0.9;
-                }
-                canvas.width = width;
-                canvas.height = height;
-
-                ctx?.drawImage(imageBitmap, 0, 0, width, height);
-                checkSizeAndPostMessage();
-              };
-              reader.readAsDataURL(blob);
-            });
-        };
-        ctx?.drawImage(imageBitmap, 0, 0, width, height);
-        checkSizeAndPostMessage();
-      })
-      .catch((error) => {
-        throw error;
-      });
-  });
 }
 
 export function readFromFile() {
@@ -177,10 +105,7 @@ export function readFromFile() {
 
 export function isIOS() {
   const userAgent = navigator.userAgent.toLowerCase();
-  return (
-    /iphone|ipad|ipod|macintosh/.test(userAgent) ||
-    (userAgent.includes("mac") && "ontouchend" in document)
-  );
+  return /iphone|ipad|ipod/.test(userAgent);
 }
 
 export function useWindowSize() {
@@ -333,8 +258,8 @@ export function isVisionModel(model: string) {
     "gpt-4o",
     "gpt-4o-mini",
   ];
-
-  const isGpt4Turbo = (model.includes("gpt-4-turbo") || model.includes("gpt-4o") ) && !model.includes("preview");
+  const isGpt4Turbo =
+    model.includes("gpt-4-turbo") && !model.includes("preview");
 
   return (
     visionKeywords.some((keyword) => model.includes(keyword)) || isGpt4Turbo

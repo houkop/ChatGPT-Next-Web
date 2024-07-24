@@ -41,12 +41,7 @@ const tr: PartialLocaleType = {
     Copy: "Tümünü Kopyala",
     Download: "İndir",
     MessageFromYou: "Sizin Mesajınız",
-    MessageFromChatGPT: {
-      NoRole: "ChatGPT'den Mesaj",
-      RoleAssistant: "Asistan",
-      RoleSystem: "Sistem",
-      SysMemoryPrompt: "Sistem Belleği İsteği",
-    },
+    MessageFromChatGPT: "ChatGPT'nin Mesajı",
   },
   Memory: {
     Title: "Bellek Komutları",
@@ -96,10 +91,6 @@ const tr: PartialLocaleType = {
       Title: "Mesaj Önizleme Balonu",
       SubTitle: "Preview markdown in bubble",
     },
-    AutoScrollMessage: {
-      Title: "Otomatik Kaydırma Yanıtı",
-      SubTitle: "Yanıt verirken mesajı kaydır",
-    },
     Mask: {
       Splash: {
         Title: "Mask Splash Screen",
@@ -137,14 +128,11 @@ const tr: PartialLocaleType = {
     Usage: {
       Title: "Hesap Bakiyesi",
       SubTitle(used: any, total: any) {
-        const hardLimitusd = total.hard_limit_usd !== undefined ? new Intl.NumberFormat('tr-TR', { style: 'currency', currency: 'USD' }).format(total.hard_limit_usd) : "bilinmiyor";
-        const hardLimit = total.system_hard_limit_usd !== undefined ? new Intl.NumberFormat('tr-TR', { style: 'currency', currency: 'USD' }).format(total.system_hard_limit_usd) : "bilinmiyor";
-        const usedFormatted = new Intl.NumberFormat('tr-TR', { style: 'currency', currency: 'USD' }).format(used);
-        return `Bu ay kullanılan: ${usedFormatted}, Sert sınır: ${hardLimitusd}, Onaylanan kullanım limiti: ${hardLimit}`;
+        return `Bu ay kullanılan $${used}, abonelik $${total}`;
       },
       IsChecking: "Kontrol ediliyor...",
       Check: "Tekrar Kontrol Et",
-      NoAccess: `Bakiyeyi kontrol etmek için, API Anahtarında "sess-" önekiyle başlayan Oturum Anahtarını girin.`,
+      NoAccess: "Bakiyeyi kontrol etmek için API anahtarını girin",
     },
 
     Model: "Model",
@@ -198,10 +186,6 @@ const tr: PartialLocaleType = {
   FineTuned: {
     Sysmessage: "Sen bir asistansın",
   },
-  PrivacyPage: {
-    Name: "Gizlilik",
-    Confirm: "Kabul Et",
-  },
   Mask: {
     Name: "Mask",
     Page: {
@@ -244,7 +228,6 @@ const tr: PartialLocaleType = {
     Cancel: "Cancel",
     Close: "Close",
     Create: "Create",
-    Continue: "Continue",
     Edit: "Edit",
   },
   Exporter: {

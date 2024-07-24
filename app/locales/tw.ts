@@ -20,7 +20,7 @@ const tw = {
     Later: "稍候再說",
   },
   ChatItem: {
-    ChatItemCount: (count: number) => `${count} 一則對話`,
+    ChatItemCount: (count: number) => `${count} 則對話`,
   },
   Chat: {
     SubTitle: (count: number) => `您已經與 ChatGPT 進行了 ${count} 則對話`,
@@ -88,12 +88,7 @@ const tw = {
     Download: "下載檔案",
     Share: "分享到 ShareGPT",
     MessageFromYou: "來自您的訊息",
-    MessageFromChatGPT: {
-      NoRole: "來自ChatGPT的訊息",
-      RoleAssistant: "助理",
-      RoleSystem: "系統",
-      SysMemoryPrompt: "系統記憶提示",
-    },
+    MessageFromChatGPT: "來自 ChatGPT 的訊息",
     Format: {
       Title: "匯出格式",
       SubTitle: "可以匯出 Markdown 文字檔或者 PNG 圖片",
@@ -222,17 +217,12 @@ const tw = {
           Password: "UpStash Redis REST Token",
         },
       },
-      
 
       LocalState: "本機資料",
       Overview: (overview: any) => {
         return `${overview.chat} 次對話，${overview.message} 則訊息，${overview.prompt} 條提示詞，${overview.mask} 個角色範本`;
       },
-      ImportFailed: "導入失敗",
-    },
-    AutoScrollMessage: {
-      Title: "Auto-Scroll Reply",
-      SubTitle: "Scroll the message during reply",
+      ImportFailed: "匯入失敗",
     },
     Mask: {
       Splash: {
@@ -274,14 +264,11 @@ const tw = {
     Usage: {
       Title: "帳戶餘額",
       SubTitle(used: any, total: any) {
-        const hardLimitusd = total.hard_limit_usd !== undefined ? new Intl.NumberFormat('zh-CN', { style: 'currency', currency: 'USD' }).format(total.hard_limit_usd) : "未知";
-        const hardLimit = total.system_hard_limit_usd !== undefined ? new Intl.NumberFormat('zh-CN', { style: 'currency', currency: 'USD' }).format(total.system_hard_limit_usd) : "未知";
-        const usedFormatted = new Intl.NumberFormat('zh-CN', { style: 'currency', currency: 'USD' }).format(used);
-        return `本月使用金额：${usedFormatted}，硬限制金额：${hardLimitusd}，批准使用限额：${hardLimit}`;
+        return `本月已使用 $${used}，訂閱總額 $${total}`;
       },
       IsChecking: "正在檢查…",
       Check: "重新檢查",
-      NoAccess: `輸入以"sess-"為前綴的API金鑰中的會話金鑰以檢查餘額。`,
+      NoAccess: "輸入 API Key 檢視餘額",
     },
 
     Access: {
@@ -419,10 +406,6 @@ const tw = {
   },
   Plugin: { Name: "外掛" },
   FineTuned: { Sysmessage: "你是一個助手" },
-  PrivacyPage: {
-    Name: "隱私",
-    Confirm: "同意",
-  },
   Mask: {
     Name: "角色範本",
     Page: {
@@ -482,7 +465,6 @@ const tw = {
     Cancel: "取消",
     Close: "關閉",
     Create: "新增",
-    Continue: "繼續",
     Edit: "編輯",
     Export: "匯出",
     Import: "匯入",
@@ -502,8 +484,8 @@ const tw = {
 
 type DeepPartial<T> = T extends object
   ? {
-    [P in keyof T]?: DeepPartial<T[P]>;
-  }
+      [P in keyof T]?: DeepPartial<T[P]>;
+    }
   : T;
 
 export type LocaleType = typeof tw;

@@ -41,12 +41,7 @@ const de: PartialLocaleType = {
     Copy: "Alles kopieren",
     Download: "Herunterladen",
     MessageFromYou: "Deine Nachricht",
-    MessageFromChatGPT: {
-      NoRole: "Nachricht von ChatGPT",
-      RoleAssistant: "Assistent",
-      RoleSystem: "System",
-      SysMemoryPrompt: "Systemspeicher-Prompt",
-    },
+    MessageFromChatGPT: "Nachricht von ChatGPT",
   },
   Memory: {
     Title: "Gedächtnis-Prompt",
@@ -96,10 +91,6 @@ const de: PartialLocaleType = {
       Title: "Vorschau-Bubble senden",
       SubTitle: "Preview markdown in bubble",
     },
-    AutoScrollMessage: {
-      Title: "Auto-Scroll-Antwort",
-      SubTitle: "Nachricht beim Antworten scrollen",
-    },
     Mask: {
       Splash: {
         Title: "Mask Splash Screen",
@@ -137,14 +128,11 @@ const de: PartialLocaleType = {
     Usage: {
       Title: "Kontostand",
       SubTitle(used: any, total: any) {
-        const hardLimitusd = total.hard_limit_usd !== undefined ? new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'USD' }).format(total.hard_limit_usd) : "unbekannt";
-        const hardLimit = total.system_hard_limit_usd !== undefined ? new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'USD' }).format(total.system_hard_limit_usd) : "unbekannt";
-        const usedFormatted = new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'USD' }).format(used);
-        return `Diesen Monat verwendet: ${usedFormatted}, Harte Grenze: ${hardLimitusd}, Genehmigtes Nutzungslimit: ${hardLimit}`;
+        return `Diesen Monat ausgegeben $${used}, Abonnement $${total}`;
       },
       IsChecking: "Wird überprüft...",
       Check: "Erneut prüfen",
-      NoAccess: `Geben Sie den Sitzungsschlüssel in den API-Schlüssel ein, der mit dem Präfix "sess-" beginnt, um den Saldo zu überprüfen.`,
+      NoAccess: "API-Schlüssel eingeben, um den Kontostand zu überprüfen",
     },
     Model: "Modell",
     Temperature: {
@@ -197,10 +185,6 @@ const de: PartialLocaleType = {
   FineTuned: {
     Sysmessage: "Du bist ein Assistent, der",
   },
-  PrivacyPage: {
-    Name: "Datenschutz",
-    Confirm: "Zustimmen",
-  },
   Mask: {
     Name: "Mask",
     Page: {
@@ -243,7 +227,6 @@ const de: PartialLocaleType = {
     Cancel: "Cancel",
     Close: "Close",
     Create: "Create",
-    Continue: "Fortsetzen",
     Edit: "Edit",
   },
   Exporter: {
