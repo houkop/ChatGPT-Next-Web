@@ -1,5 +1,6 @@
 import { LLMModel } from "../client/api";
 import { isMacOS } from "../utils";
+import { DalleSize } from "../typing";
 import { getClientConfig } from "../config/client";
 import {
   DEFAULT_INPUT_TEMPLATE,
@@ -36,6 +37,7 @@ export const DEFAULT_CONFIG = {
   submitKey: isMacOS() ? SubmitKey.MetaEnter : SubmitKey.CtrlEnter,
   avatar: "1f603",
   fontSize: 14,
+  fontFamily: "",
   theme: Theme.Auto as Theme,
   tightBorder: !!config?.isApp,
   sendPreviewBubble: true,
@@ -90,18 +92,8 @@ export const DEFAULT_CONFIG = {
     compressMessageLengthThreshold: 1000,
     enableInjectSystemPrompts: true,
     template: config?.template ?? DEFAULT_INPUT_TEMPLATE,
-    systemprompt: {
-      default: DEFAULT_SYSTEM_TEMPLATE,
-    },
+    size: "1024x1024" as DalleSize,
   },
-  /**
-   * Text Moderation Open AI
-   * Author: @H0llyW00dzZ
-   **/
-  textmoderation: false, // text moderation default is enabled
-
-  desktopShortcut: "",
-  speed_animation: 60, // Lower values will result in faster animation
 };
 
 export type ChatConfig = typeof DEFAULT_CONFIG;
