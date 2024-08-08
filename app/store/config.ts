@@ -78,13 +78,6 @@ export const DEFAULT_CONFIG = {
      * DALL·E-2 : Must be one of `256x256`, `512x512`, or `1024x1024`.
      * DALL-E-3 : Must be one of `1024x1024`, `1792x1024`, or `1024x1792`.
      **/
-    size: "1024x1024",
-    /** Style DALL-E-3 Models
-     * Author: @H0llyW00dzZ
-     * Must be one of `vivid` or `natural`. 
-     * `Vivid` causes the model to lean towards generating hyper-real and dramatic images. 
-     * `Natural` causes the model to produce more natural, less hyper-real looking images. 
-     */
     style: "vivid", // Only DALL·E-3 for DALL·E-2 not not really needed
     sendMemory: true,
     useMaxTokens: false,
