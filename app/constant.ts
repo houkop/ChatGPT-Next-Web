@@ -251,8 +251,9 @@ export const KnowledgeCutOffDate: Record<string, string> = {
 
 const openaiModels = [
   "gpt-4o",
+  "gpt-4o-2024-08-06",
   "gpt-4o-mini",
-  "ft:gpt-3.5-turbo-0125:personal:fix-mistakes:9BTsglDw",
+  "ft:gpt-4o-mini-2024-07-18:personal:fix-mistakes:9ueNDJF9",
   "dall-e-3",
 ];
 

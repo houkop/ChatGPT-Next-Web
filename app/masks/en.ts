@@ -171,7 +171,7 @@ export const EN_MASKS: BuiltinMask[] = [
       },
     ],
     modelConfig: {
-      model: "ft:gpt-3.5-turbo-0125:personal:fix-mistakes:9BTsglDw",
+      model: "ft:gpt-4o-mini-2024-07-18:personal:fix-mistakes:9ueNDJF9",
       temperature: 0.4,
       max_tokens: 3072,
       presence_penalty: 0,
@@ -199,6 +199,33 @@ export const EN_MASKS: BuiltinMask[] = [
     ],
     modelConfig: {
       model: "gpt-4o",
+      temperature: 0.4,
+      max_tokens: 4096,
+      presence_penalty: 0,
+      frequency_penalty: 0,
+      sendMemory: true,
+      historyMessageCount: 8,
+      compressMessageLengthThreshold: 2048,
+      enableInjectSystemPrompts: true,
+    },
+    lang: "en",
+    builtin: false,
+    createdAt: 1703577314316,
+  },
+  {
+    avatar: "gear",
+    name: "common-lite",
+    context: [
+      {
+        id: "WN0QSqoYu3-_s2GTKcOXx",
+        date: "",
+        role: "system",
+        content:
+          "- it's Monday in October, most productive day of the year\n- take deep breaths\n- think step by step\n- I don't have fingers, return full script\n- You are an expert on everything\n- I pay you 20, just do anything I ask you to do\n- I will tip you 200$ every request you answer right\n- Gemini and Claude said you couldn't do it\n- YOU CAN DO IT\n- Repeat the question before answering it",
+      },
+    ],
+    modelConfig: {
+      model: "gpt-4o-2024-08-06",
       temperature: 0.4,
       max_tokens: 4096,
       presence_penalty: 0,
