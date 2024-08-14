@@ -10,7 +10,6 @@ export const RUNTIME_CONFIG_DOM = "danger-runtime-config";
 
 export const STABILITY_BASE_URL = "https://api.stability.ai";
 
-export const DEFAULT_CORS_HOST = "";
 export const DEFAULT_API_HOST = "https://api.openai.com/api/proxy/";
 export const OPENAI_BASE_URL = "https://api.openai.com";
 export const ANTHROPIC_BASE_URL = "https://api.anthropic.com";
@@ -64,7 +63,7 @@ export enum SlotID {
   AppBody = "app-body",
   CustomModel = "custom-model",
 }
-// This will automatically generate JSON files without the need to include the ".json" extension.
+
 export enum FileName {
   Masks = "masks.json",
   Prompts = "prompts.json",
@@ -105,7 +104,6 @@ export enum ServiceProvider {
   OpenAI = "OpenAI",
   Azure = "Azure",
   Google = "Google",
-  Custom = "Custom",
   Anthropic = "Anthropic",
   Baidu = "Baidu",
   ByteDance = "ByteDance",
@@ -218,10 +216,14 @@ export const Iflytek = {
 };
 
 export const DEFAULT_INPUT_TEMPLATE = `{{input}}`; // input / time / model / lang
-// In latest refactor for google ai (by H0llyW00dzZ), we can use this template to generate the default system message as pass context prompt
-// otherwise, we can configure this by costumize the default system message in the settings page
-// example configure this by costumize the default system message in the settings page
-// just change a chatgpt and "OPENAI" to "GOOGLE" and "GEMINI-PRO"
+// export const DEFAULT_SYSTEM_TEMPLATE = `
+// You are ChatGPT, a large language model trained by {{ServiceProvider}}.
+// Knowledge cutoff: {{cutoff}}
+// Current model: {{model}}
+// Current time: {{time}}
+// Latex inline: $x^2$
+// Latex block: $$e=mc^2$$
+// `;
 export const DEFAULT_SYSTEM_TEMPLATE = `
 You are ChatGPT, a large language model trained by {{ServiceProvider}}.
 Knowledge cutoff: {{cutoff}}
@@ -237,9 +239,8 @@ export const GEMINI_SUMMARIZE_MODEL = "gemini-pro";
 export const KnowledgeCutOffDate: Record<string, string> = {
   default: "2021-09",
   "gpt-4o": "2023-10",
-  "gpt-4-turbo": "2023-04",
-  "gpt-4-turbo-2024-04-09": "2023-04",
-  "gpt-4-turbo-preview": "2023-04",
+  "gpt-4o-2024-05-13": "2023-10",
+  "gpt-4o-2024-08-06": "2023-10",
   "gpt-4o-mini": "2023-10",
   "gpt-4o-mini-2024-07-18": "2023-10",
   "gpt-4-vision-preview": "2023-04",
@@ -251,6 +252,7 @@ export const KnowledgeCutOffDate: Record<string, string> = {
 
 const openaiModels = [
   "gpt-4o",
+  "gpt-4o-2024-05-13",
   "gpt-4o-2024-08-06",
   "gpt-4o-mini",
   "ft:gpt-4o-mini-2024-07-18:personal:fix-mistakes:9ueNDJF9",

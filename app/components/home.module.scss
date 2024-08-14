@@ -94,19 +94,6 @@
   }
 }
 
-.rotate {
-  animation: rotate 5s infinite linear;
-}
-
-@keyframes rotate {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
-
 .window-content {
   width: var(--window-content-width);
   height: 100%;
@@ -247,11 +234,6 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-}
-
-.chat-list-search {
-  padding: 10px 0px;
-  margin-bottom: 10px;
 }
 
 .narrow-sidebar {

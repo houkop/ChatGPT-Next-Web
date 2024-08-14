@@ -8,15 +8,7 @@ export function getClientConfig() {
 
   if (typeof process !== "undefined") {
     // server side
-    const buildConfig = getBuildConfig();
-    const commitMessage = buildConfig.commitMessage.description;
-    return {
-      ...buildConfig,
-      commitMessage: {
-        ...buildConfig.commitMessage,
-        description: commitMessage,
-      },
-    };
+    return getBuildConfig();
   }
 }
 

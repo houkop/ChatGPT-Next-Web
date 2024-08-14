@@ -43,17 +43,13 @@
         "show": true,
         "startDragging": true,
         "unmaximize": true,
-        "unminimize": true,
-        "setAlwaysOnTop": true
+        "unminimize": true
       },
       "fs": {
         "all": true
       },
       "notification": {
         "all": true
-      },
-      "process": {
-        "relaunch": true
       }
     },
     "bundle": {
@@ -90,15 +86,15 @@
       }
     },
     "security": {
-      "dangerousUseHttpScheme": true,
-      "csp": null
+      "csp": null,
+      "dangerousUseHttpScheme": true
     },
     "updater": {
       "active": true,
       "endpoints": [
         "https://github.com/ChatGPTNextWeb/ChatGPT-Next-Web/releases/latest/download/latest.json"
       ],
-      "dialog": true,
+      "dialog": false,
       "windows": {
         "installMode": "passive"
       },
@@ -112,8 +108,7 @@
         "title": "NextChat",
         "width": 960,
         "hiddenTitle": true,
-        "titleBarStyle": "Overlay",
-        "alwaysOnTop": false
+        "titleBarStyle": "Overlay"
       }
     ]
   }

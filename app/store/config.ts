@@ -1,16 +1,13 @@
 import { LLMModel } from "../client/api";
-import { isMacOS } from "../utils";
-import { DalleSize } from "../typing";
+import { DalleSize, DalleQuality, DalleStyle } from "../typing";
 import { getClientConfig } from "../config/client";
 import {
   DEFAULT_INPUT_TEMPLATE,
   DEFAULT_MODELS,
   DEFAULT_SIDEBAR_WIDTH,
-  DEFAULT_SYSTEM_TEMPLATE,
   StoreKey,
   ServiceProvider,
 } from "../constant";
-import Locale from ".././locales";
 import { createPersistStore } from "../utils/store";
 
 export type ModelType = (typeof DEFAULT_MODELS)[number]["name"];
@@ -41,7 +38,6 @@ export const DEFAULT_CONFIG = {
   theme: Theme.Auto as Theme,
   tightBorder: !!config?.isApp,
   sendPreviewBubble: true,
-  autoScrollMessage: false,
   enableAutoGenerateTitle: true,
   sidebarWidth: DEFAULT_SIDEBAR_WIDTH,
 
@@ -54,38 +50,21 @@ export const DEFAULT_CONFIG = {
   models: DEFAULT_MODELS as any as LLMModel[],
 
   modelConfig: {
-    model: "gpt-3.5-turbo" as ModelType,
+    model: "gpt-4o-mini" as ModelType,
     providerName: "OpenAI" as ServiceProvider,
     temperature: 0.5,
     top_p: 1,
     max_tokens: 8000,
     presence_penalty: 0,
     frequency_penalty: 0,
-    /**
-     * DALL·E Models
-     * Author: @H0llyW00dzZ
-     *
-     **/
-    n: 1, // The number of images to generate. Must be between 1 and 10. For dall-e-3, only n=1 is supported.
-    /** Quality Only DALL·E-3 Models
-     * Author: @H0llyW00dzZ
-     * The quality of the image that will be generated. 
-     * `hd` creates images with finer details and greater consistency across the image.
-     **/
-    quality: "standard", // Only DALL·E-3 for DALL·E-2 not not really needed
-    /** SIZE ALL·E Models
-     * Author: @H0llyW00dzZ
-     * DALL·E-2 : Must be one of `256x256`, `512x512`, or `1024x1024`.
-     * DALL-E-3 : Must be one of `1024x1024`, `1792x1024`, or `1024x1792`.
-     **/
-    style: "vivid", // Only DALL·E-3 for DALL·E-2 not not really needed
     sendMemory: true,
-    useMaxTokens: false,
     historyMessageCount: 4,
-    compressMessageLengthThreshold: 1000,
+    compressMessageLengthThreshold: 3000,
     enableInjectSystemPrompts: true,
     template: config?.template ?? DEFAULT_INPUT_TEMPLATE,
     size: "1024x1024" as DalleSize,
+    quality: "standard" as DalleQuality,
+    style: "vivid" as DalleStyle,
   },
 };
 
@@ -128,45 +107,6 @@ export const ModalConfigValidator = {
   n(x: number) {
     return limitNumber(x, 1, 10, 1);
   },
-  quality(x: string) {
-    return ["hd"].includes(x) ? x : "hd";
-  },
-  size(x: string) {
-    const validSizes = ["256x256", "512x512", "1024x1024", "1792x1024", "1024x1792"];
-    return validSizes.includes(x) ? x : ""; // default its already in model config settings
-  },
-  style(x: string) {
-    const validStyles = ["vivid", "natural"];
-    return validStyles.includes(x) ? x : ""; // default its already in model config settings
-  },
-  system_fingerprint(x: string) {
-    // Example: Ensure the fingerprint matches the format "fp_XXXXXXXXXX" where X represents a hexadecimal digit
-    const regex = /^fp_[0-9a-fA-F]{10}$/;
-    return regex.test(x) ? x : "";
-  },
-};
-
-/** Shortcut Regex Validator
- * Author: @H0llyW00dzZ
- * Regular expression `^(?:[a-zA-Z]+|\d+)(?:\+(?:[a-zA-Z]+|\d+))*$` is used to validate the shortcut format. Here's a breakdown of the regular expression:
-  - `^` - Start of the string
-  - `(?:[a-zA-Z]+|\d+)` - Matches one or more alphabetic characters or digits (e.g., `Ctrl`, `Alt`, `Shift`, `CmdOrControl`, `F12`, `Q`, etc.)
-  - `(?:\+(?:[a-zA-Z]+|\d+))*` - Matches zero or more occurrences of a `+` followed by one or more alphabetic characters or digits (e.g., `+Ctrl`, `+Alt`, `+Shift`, `+CmdOrControl`, `+F12`, `+Q`, etc.)
-  - `$` - End of the string
-  Note: This Regex Validator for made types are safe, (e.g if there is package have CVE or something, it wont affected because sometimes when there is package got a CVE, and the patch still not available then it fucked up your project 🏴‍☠️.)
- **/
-
-export const ShortcutValidator = {
-  desktopShortcut(x: string) {
-    const regex = /^(?:[a-zA-Z]+|\d+)(?:\+(?:[a-zA-Z]+|\d+))*$/;
-    return regex.test(x) ? x : "";
-  },
-};
-
-export const speed_animationValidator = {
-  speed_animation(x: number) {
-    return limitNumber(x, 1, 200, 1); // Set the range of 1 to 100 for the speed animation
-  },
 };
 
 export const useAppConfig = createPersistStore(
@@ -203,7 +143,7 @@ export const useAppConfig = createPersistStore(
   }),
   {
     name: StoreKey.Config,
-    version: 4.5, // DALL·E Models switching version to 4.1 because in 4.0 @Yidadaa using it.
+    version: 3.9, // DALL·E Models switching version to 4.1 because in 4.0 @Yidadaa using it.
     migrate(persistedState, version) {
       const state = persistedState as ChatConfig;
 
@@ -239,41 +179,6 @@ export const useAppConfig = createPersistStore(
           state.modelConfig.template !== DEFAULT_INPUT_TEMPLATE
             ? state.modelConfig.template
             : config?.template ?? DEFAULT_INPUT_TEMPLATE;
-      }
-
-      if (version < 4.1) {
-        state.modelConfig = {
-          ...state.modelConfig,
-          n: 1,
-          quality: "standard",
-          size: "1024x1024",
-          style: "vivid",
-        };
-      }
-
-      // Speed Animation default is 30, Lower values will result in faster animation
-
-      if (version < 4.3) {
-        state.speed_animation = 60;
-      }
-
-      // control useMaxTokens for latest models gpt-4-1106-preview, default is false
-
-      if (version < 4.4) {
-        state.modelConfig.useMaxTokens = false;
-      }
-
-      // use local language for system prompt
-
-      if (version < 4.5) {
-        state.modelConfig.systemprompt = {
-          default: DEFAULT_SYSTEM_TEMPLATE,
-        }
-      }
-
-      // set false as default, it much better instead of true
-      if (version < 4.6) {
-        state.autoScrollMessage = false;
       }
 
       return state as any;
