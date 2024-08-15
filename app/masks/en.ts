@@ -264,7 +264,6 @@ export const EN_MASKS: BuiltinMask[] = [
         historyMessageCount: 5,
         compressMessageLengthThreshold: 24000,
         enableInjectSystemPrompts: false,
-        useMaxTokens: true
     },
     lang: "en",
     builtin: true,
