@@ -5,12 +5,21 @@ import {
   DEFAULT_INPUT_TEMPLATE,
   DEFAULT_MODELS,
   DEFAULT_SIDEBAR_WIDTH,
+  DEFAULT_TTS_ENGINE,
+  DEFAULT_TTS_ENGINES,
+  DEFAULT_TTS_MODEL,
+  DEFAULT_TTS_MODELS,
+  DEFAULT_TTS_VOICE,
+  DEFAULT_TTS_VOICES,
   StoreKey,
   ServiceProvider,
 } from "../constant";
 import { createPersistStore } from "../utils/store";
 
 export type ModelType = (typeof DEFAULT_MODELS)[number]["name"];
+export type TTSModelType = (typeof DEFAULT_TTS_MODELS)[number];
+export type TTSVoiceType = (typeof DEFAULT_TTS_VOICES)[number];
+export type TTSEngineType = (typeof DEFAULT_TTS_ENGINES)[number];
 
 export enum SubmitKey {
   Enter = "Enter",
@@ -59,18 +68,28 @@ export const DEFAULT_CONFIG = {
     frequency_penalty: 0,
     sendMemory: true,
     historyMessageCount: 4,
-    compressMessageLengthThreshold: 3000,
+    compressMessageLengthThreshold: 4000,
     enableInjectSystemPrompts: true,
     template: config?.template ?? DEFAULT_INPUT_TEMPLATE,
     size: "1024x1024" as DalleSize,
     quality: "standard" as DalleQuality,
     style: "vivid" as DalleStyle,
   },
+
+  ttsConfig: {
+    enable: false,
+    autoplay: false,
+    engine: DEFAULT_TTS_ENGINE,
+    model: DEFAULT_TTS_MODEL,
+    voice: DEFAULT_TTS_VOICE,
+    speed: 1.0,
+  },
 };
 
 export type ChatConfig = typeof DEFAULT_CONFIG;
 
 export type ModelConfig = ChatConfig["modelConfig"];
+export type TTSConfig = ChatConfig["ttsConfig"];
 
 export function limitNumber(
   x: number,
@@ -84,6 +103,21 @@ export function limitNumber(
 
   return Math.min(max, Math.max(min, x));
 }
+
+export const TTSConfigValidator = {
+  engine(x: string) {
+    return x as TTSEngineType;
+  },
+  model(x: string) {
+    return x as TTSModelType;
+  },
+  voice(x: string) {
+    return x as TTSVoiceType;
+  },
+  speed(x: number) {
+    return limitNumber(x, 0.25, 4.0, 1.0);
+  },
+};
 
 export const ModalConfigValidator = {
   model(x: string) {
@@ -143,7 +177,22 @@ export const useAppConfig = createPersistStore(
   }),
   {
     name: StoreKey.Config,
-    version: 3.9, // DALL·E Models switching version to 4.1 because in 4.0 @Yidadaa using it.
+    version: 4,
+
+    merge(persistedState, currentState) {
+      const state = persistedState as ChatConfig | undefined;
+      if (!state) return { ...currentState };
+      const models = currentState.models.slice();
+      state.models.forEach((pModel) => {
+        const idx = models.findIndex(
+          (v) => v.name === pModel.name && v.provider === pModel.provider,
+        );
+        if (idx !== -1) models[idx] = pModel;
+        else models.push(pModel);
+      });
+      return { ...currentState, ...state, models: models };
+    },
+
     migrate(persistedState, version) {
       const state = persistedState as ChatConfig;
 
@@ -179,6 +228,13 @@ export const useAppConfig = createPersistStore(
           state.modelConfig.template !== DEFAULT_INPUT_TEMPLATE
             ? state.modelConfig.template
             : config?.template ?? DEFAULT_INPUT_TEMPLATE;
+      }
+
+      if (version < 4) {
+        state.modelConfig.compressModel =
+          DEFAULT_CONFIG.modelConfig.compressModel;
+        state.modelConfig.compressProviderName =
+          DEFAULT_CONFIG.modelConfig.compressProviderName;
       }
 
       return state as any;
