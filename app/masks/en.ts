@@ -15,6 +15,7 @@ export const EN_MASKS: BuiltinMask[] = [
     ],
     modelConfig: {
       model: "gpt-4o",
+      max_tokens: 4096,
       temperature: 0.5,
       presence_penalty: 0,
       frequency_penalty: 0,
@@ -47,7 +48,7 @@ export const EN_MASKS: BuiltinMask[] = [
     modelConfig: {
       model: "gpt-4o",
       temperature: 0.5,
-      max_tokens: 2000,
+      max_tokens: 4096,
       presence_penalty: 0,
       frequency_penalty: 0,
       sendMemory: true,
@@ -127,7 +128,7 @@ export const EN_MASKS: BuiltinMask[] = [
     modelConfig: {
       model: "gpt-4o",
       temperature: 0.4,
-      max_tokens: 16000,
+      max_tokens: 4096,
       presence_penalty: 0,
       frequency_penalty: 0,
       sendMemory: true,
@@ -154,7 +155,7 @@ export const EN_MASKS: BuiltinMask[] = [
     modelConfig: {
       model: "gpt-4o-2024-08-06",
       temperature: 0.4,
-      max_tokens: 8192,
+      max_tokens: 16384,
       presence_penalty: 0,
       frequency_penalty: 0,
       sendMemory: true,
@@ -184,7 +185,7 @@ export const EN_MASKS: BuiltinMask[] = [
         model: "gpt-4o",
         temperature: 0.4,
         top_p: 1,
-        max_tokens: 32000,
+        max_tokens: 4096,
         presence_penalty: 0,
         frequency_penalty: 0,
         sendMemory: true,
