@@ -271,7 +271,6 @@ export const DEFAULT_TTS_VOICES = [
 const openaiModels = [
   "gpt-4o",
   "gpt-4o-2024-05-13",
-  "gpt-4o-2024-08-06",
   "chatgpt-4o-latest",
   "gpt-4o-mini",
   "ft:gpt-4o-mini-2024-07-18:personal:fix-mistakes:9ueNDJF9",
