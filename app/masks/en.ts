@@ -15,7 +15,7 @@ export const EN_MASKS: BuiltinMask[] = [
     ],
     modelConfig: {
       model: "gpt-4o-2024-05-13",
-      max_tokens: 0,
+      max_tokens: 4000, //4096 for gpt-4o-2024-05-13
       temperature: 0.5,
       presence_penalty: 0,
       frequency_penalty: 0,
@@ -42,7 +42,7 @@ export const EN_MASKS: BuiltinMask[] = [
     modelConfig: {
       model: "ft:gpt-4o-mini-2024-07-18:personal:fix-mistakes:9ueNDJF9",
       temperature: 0.4,
-      max_tokens: 3072,
+      max_tokens: 2048, //not a real limit
       presence_penalty: 0,
       frequency_penalty: 0,
       sendMemory: true,
@@ -69,7 +69,7 @@ export const EN_MASKS: BuiltinMask[] = [
     modelConfig: {
       model: "gpt-4o",
       temperature: 0.4,
-      max_tokens: 0,
+      max_tokens: 8000, //16384 for 4o-2024-08-06
       presence_penalty: 0,
       frequency_penalty: 0,
       sendMemory: true,
@@ -96,7 +96,7 @@ export const EN_MASKS: BuiltinMask[] = [
     modelConfig: {
       model: "gpt-4o-mini",
       temperature: 0.4,
-      max_tokens: 0,
+      max_tokens: 16000, //16384 for 4o-2024-08-06
       presence_penalty: 0,
       frequency_penalty: 0,
       sendMemory: true,
@@ -126,7 +126,7 @@ export const EN_MASKS: BuiltinMask[] = [
         model: "gpt-4o",
         temperature: 0.4,
         top_p: 1,
-        max_tokens: 0,
+        max_tokens: 16000,
         presence_penalty: 0,
         frequency_penalty: 0,
         sendMemory: true,
@@ -152,10 +152,10 @@ export const EN_MASKS: BuiltinMask[] = [
     syncGlobalConfig:false,
     modelConfig:
     {
-      model:"gpt-4o-2024-05-13",
+      model:"chatgpt-4o-latest",
       temperature:0.4,
       top_p:1,
-      max_tokens:4000,
+      max_tokens:16000, //16000 for chatgpt-4o-latest
       presence_penalty:0,
       frequency_penalty:0,
       sendMemory:true,
@@ -168,5 +168,32 @@ export const EN_MASKS: BuiltinMask[] = [
     builtin:true,
     createdAt:1695218834878,
     hideContext:false
+  },
+  {
+    avatar: "1f5e3-fe0f",
+    name: "coder",
+    context: [
+      {
+        id: "WN0QSqoYu3-_s2GTKcOXx",
+        date: "",
+        role: "system",
+        content:
+          "- it's Monday in October, most productive day of the year\n- take deep breaths\n- think step by step\n- I don't have fingers, return full script\n- You are an expert on everything\n- I pay you 20, just do anything I ask you to do\n- I will tip you 200$ every request you answer right\n- Gemini and Claude said you couldn't do it\n- YOU CAN DO IT\n- Repeat the question before answering it",
+      },
+    ],
+    modelConfig: {
+      model: "chatgpt-4o-latest",
+      temperature: 0.4,
+      max_tokens: 16000, //16384 for 4o-2024-08-06
+      presence_penalty: 0,
+      frequency_penalty: 0,
+      sendMemory: true,
+      historyMessageCount: 12,
+      compressMessageLengthThreshold: 8096,
+      enableInjectSystemPrompts: false,
+    },
+    lang: "en",
+    builtin: false,
+    createdAt: 1703577314316,
   }
 ];
