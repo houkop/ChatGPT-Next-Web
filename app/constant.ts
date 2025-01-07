@@ -135,6 +135,7 @@ export enum ModelProvider {
   GPT = "GPT",
   GeminiPro = "GeminiPro",
   Anthropic = "Anthropic",
+  Claude = "Anthropic",
   Ernie = "Ernie",
   Doubao = "Doubao",
   Qwen = "Qwen",
