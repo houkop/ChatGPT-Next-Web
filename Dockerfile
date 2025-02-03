@@ -19,7 +19,9 @@ RUN apk update && apk add --no-cache git && \
 # Production image
 FROM node:18-alpine AS runner
 WORKDIR /app
+
 RUN apk add --no-cache proxychains-ng
+
 COPY --from=builder /app/public ./public
 COPY --from=builder /app/.next/standalone ./
 COPY --from=builder /app/.next/static ./.next/static
@@ -30,6 +32,10 @@ ENV OPENAI_API_KEY=""
 ENV GOOGLE_API_KEY=""
 ENV ANTHROPIC_API_KEY=""
 ENV CODE=""
+ENV ENABLE_MCP=""
+
+RUN mkdir -p /app/app/mcp && chmod 777 /app/app/mcp
+COPY --from=builder /app/app/mcp/mcp_config.default.json /app/app/mcp/mcp_config.json
 
 EXPOSE 3000
 
