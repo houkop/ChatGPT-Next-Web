@@ -472,15 +472,11 @@ export const EXCLUDE_VISION_MODEL_REGEXES = [/claude-3-5-haiku-20241022/];
 
 const openaiModels = [
   "gpt-4o",
-  "gpt-4o-2024-05-13",
-  "gpt-4o-2024-08-06",
-  "gpt-4o-2024-11-20",
   "chatgpt-4o-latest",
   "gpt-4o-mini",
   "ft:gpt-4o-mini-2024-07-18:personal:fix-mistakes:9ueNDJF9",
   "dall-e-3",
-  "o1-mini",
-  "o1-preview",
+  "o1",
   "o3-mini",
 ];
 
@@ -511,7 +507,6 @@ const googleModels = [
 ];
 
 const anthropicModels = [
-  "claude-3-5-haiku-latest",
   "claude-3-7-sonnet-latest",
 ];
 
