@@ -478,6 +478,7 @@ const openaiModels = [
   "dall-e-3",
   "o1",
   "o3-mini",
+  "gpt-4.5-preview",
 ];
 
 const googleModels = [
