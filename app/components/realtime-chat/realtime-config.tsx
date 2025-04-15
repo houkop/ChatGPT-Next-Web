@@ -9,7 +9,7 @@ import { ServiceProvider } from "@/app/constant";
 
 const providers = [ServiceProvider.OpenAI, ServiceProvider.Azure];
 
-const models = ["gpt-4o-realtime-preview-2024-10-01"];
+const models = ["gpt-4.1"];
 
 const voice = ["alloy", "shimmer", "echo"];
 

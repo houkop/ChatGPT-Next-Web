@@ -14,7 +14,7 @@ export const EN_MASKS: BuiltinMask[] = [
       },
     ],
     modelConfig: {
-      model: "gpt-4o-2024-05-13",
+      model: "gpt-4.1",
       max_tokens: 4000, //4096 for gpt-4o-2024-05-13
       temperature: 0.5,
       presence_penalty: 0,
@@ -67,7 +67,7 @@ export const EN_MASKS: BuiltinMask[] = [
       },
     ],
     modelConfig: {
-      model: "gpt-4o",
+      model: "gpt-4.1",
       temperature: 0.4,
       max_tokens: 8000, //16384 for 4o-2024-08-06
       presence_penalty: 0,
@@ -94,7 +94,7 @@ export const EN_MASKS: BuiltinMask[] = [
       },
     ],
     modelConfig: {
-      model: "gpt-4o-mini",
+      model: "gpt-4.1-mini",
       temperature: 0.4,
       max_tokens: 16000, //16384 for 4o-2024-08-06
       presence_penalty: 0,
@@ -123,7 +123,7 @@ export const EN_MASKS: BuiltinMask[] = [
     syncGlobalConfig: false,
     modelConfig:
     {
-        model: "gpt-4o",
+        model: "gpt-4.1",
         temperature: 0.4,
         top_p: 1,
         max_tokens: 16000,

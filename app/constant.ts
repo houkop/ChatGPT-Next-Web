@@ -408,23 +408,17 @@ You are an AI assistant with access to system tools. Your role is to help users 
    
 `;
 
-export const SUMMARIZE_MODEL = "gpt-4o-mini";
+export const SUMMARIZE_MODEL = "gpt-4.1-mini";
 export const GEMINI_SUMMARIZE_MODEL = "gemini-pro";
 export const DEEPSEEK_SUMMARIZE_MODEL = "deepseek-chat";
 
 export const KnowledgeCutOffDate: Record<string, string> = {
   default: "2021-09",
-  "gpt-4o": "2023-10",
-  "gpt-4o-2024-05-13": "2023-10",
-  "gpt-4o-2024-08-06": "2023-10",
-  "gpt-4o-2024-11-20": "2023-10",
+  "gpt-4.1": "2024-01",
   "chatgpt-4o-latest": "2023-10",
-  "gpt-4o-mini": "2023-10",
-  "gpt-4o-mini-2024-07-18": "2023-10",
   "gpt-4-vision-preview": "2023-04",
   "o1-mini-2024-09-12": "2023-10",
   "o1-mini": "2023-10",
-  "o1-preview-2024-09-12": "2023-10",
   "o1-preview": "2023-10",
   "o1-2024-12-17": "2023-10",
   o1: "2023-10",
@@ -455,6 +449,8 @@ export const DEFAULT_TTS_VOICES = [
 export const VISION_MODEL_REGEXES = [
   /vision/,
   /gpt-4o/,
+  /gpt-4.1/,
+  /o3/,
   /claude-3/,
   /gemini-1\.5/,
   /gemini-exp/,
@@ -471,9 +467,9 @@ export const VISION_MODEL_REGEXES = [
 export const EXCLUDE_VISION_MODEL_REGEXES = [/claude-3-5-haiku-20241022/];
 
 const openaiModels = [
-  "gpt-4o",
+  "gpt-4.1",
   "chatgpt-4o-latest",
-  "gpt-4o-mini",
+  "gpt-4.1-mini",
   "ft:gpt-4o-mini-2024-07-18:personal:fix-mistakes:9ueNDJF9",
   "dall-e-3",
   "o1",
