@@ -473,7 +473,8 @@ const openaiModels = [
   "ft:gpt-4o-mini-2024-07-18:personal:fix-mistakes:9ueNDJF9",
   "dall-e-3",
   "o1",
-  "o3-mini",
+  "o3",
+  "o4-mini",
   "gpt-4.5-preview",
 ];
 
