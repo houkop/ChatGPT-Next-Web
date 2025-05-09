@@ -414,7 +414,21 @@ export const DEEPSEEK_SUMMARIZE_MODEL = "deepseek-chat";
 
 export const KnowledgeCutOffDate: Record<string, string> = {
   default: "2021-09",
-  "gpt-4.1": "2024-01",
+  "gpt-4-turbo": "2023-12",
+  "gpt-4-turbo-2024-04-09": "2023-12",
+  "gpt-4-turbo-preview": "2023-12",
+  "gpt-4.1": "2024-06",
+  "gpt-4.1-2025-04-14": "2024-06",
+  "gpt-4.1-mini": "2024-06",
+  "gpt-4.1-mini-2025-04-14": "2024-06",
+  "gpt-4.1-nano": "2024-06",
+  "gpt-4.1-nano-2025-04-14": "2024-06",
+  "gpt-4.5-preview": "2023-10",
+  "gpt-4.5-preview-2025-02-27": "2023-10",
+  "gpt-4o": "2023-10",
+  "gpt-4o-2024-05-13": "2023-10",
+  "gpt-4o-2024-08-06": "2023-10",
+  "gpt-4o-2024-11-20": "2023-10",
   "chatgpt-4o-latest": "2023-10",
   "gpt-4-vision-preview": "2023-04",
   "o1-mini-2024-09-12": "2023-10",
@@ -449,7 +463,7 @@ export const DEFAULT_TTS_VOICES = [
 export const VISION_MODEL_REGEXES = [
   /vision/,
   /gpt-4o/,
-  /gpt-4.1/,
+  /gpt-4\.1/,
   /o3/,
   /claude-3/,
   /gemini-1\.5/,
@@ -462,20 +476,23 @@ export const VISION_MODEL_REGEXES = [
   /^dall-e-3$/, // Matches exactly "dall-e-3"
   /glm-4v/,
   /vl/i,
+  /o3/,
+  /o4-mini/,
 ];
 
 export const EXCLUDE_VISION_MODEL_REGEXES = [/claude-3-5-haiku-20241022/];
 
 const openaiModels = [
   "gpt-4.1",
-  "chatgpt-4o-latest",
   "gpt-4.1-mini",
+  "gpt-4.5-preview",
+  "chatgpt-4o-latest",
   "ft:gpt-4o-mini-2024-07-18:personal:fix-mistakes:9ueNDJF9",
   "dall-e-3",
   "o1",
+  "o1-mini",
   "o3",
   "o4-mini",
-  "gpt-4.5-preview",
 ];
 
 const googleModels = [
